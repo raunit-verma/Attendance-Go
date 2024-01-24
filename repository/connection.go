@@ -25,6 +25,7 @@ func GetDB() *pg.DB {
 	}
 	if pgDb == nil {
 		pgDb = ConnectToDB(DbConfig)
+		_ = CreateSchema(pgDb)
 	}
 	return pgDb
 }
@@ -45,6 +46,5 @@ func ConnectToDB(dbConfig DbConfig) *pg.DB {
 	}
 
 	log.Printf("Postgres Connected\n")
-	defer db.Close()
 	return db
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"attendance/api/router"
+	"attendance/repository"
 	"fmt"
 	"log"
 	"net/http"
@@ -21,6 +22,9 @@ func main() {
 	}
 
 	r := router.NewMUXRouter()
+
+	db := repository.GetDB()
+	defer db.Close()
 
 	fmt.Printf("Server Starting at Port : %v\n", serverConfig.Port)
 	log.Fatal(http.ListenAndServe(serverConfig.Port, r))
