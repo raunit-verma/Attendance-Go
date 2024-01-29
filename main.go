@@ -3,18 +3,21 @@ package main
 import (
 	"attendance/api/router"
 	"attendance/repository"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
+
+func init() {
+	zap.ReplaceGlobals(zap.Must(zap.NewProduction()))
+}
 
 func main() {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatal("Error loading environment variable.")
+		zap.L().Fatal("Error loading Env")
 	}
 
 	serverConfig := router.ServerConfig{
@@ -25,8 +28,11 @@ func main() {
 
 	db := repository.GetDB()
 	defer db.Close()
+	defer zap.L().Sync()
 
-	fmt.Printf("Server Starting at Port : %v\n", serverConfig.Port)
-	log.Fatal(http.ListenAndServe(serverConfig.Port, r))
+	zap.L().Info(`Server starting on Port ` + serverConfig.Port)
 
+	if err := http.ListenAndServe(serverConfig.Port, r); err != nil {
+		zap.L().Fatal("HTTP server failed to start at Port "+serverConfig.Port, zap.Error((err)))
+	}
 }

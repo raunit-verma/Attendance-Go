@@ -1,17 +1,19 @@
 package repository
 
 import (
+	"attendance/util"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
+// write sql scripts
 type User struct {
-	UserID   uuid.UUID
+	UserID   string
 	Username string `json:"username"`
 	Password string `json:"password"`
 	FullName string `json:"fullname"`
@@ -21,10 +23,33 @@ type User struct {
 }
 
 type Attendance struct {
-	UserID       uuid.UUID
+	UserID       string
 	AttendanceID uuid.UUID
 	PunchInDate  time.Time
 	PunchOutDate time.Time
+}
+
+func (newUser User) IsNewUserDataMissing() bool {
+	if newUser.Username == "" {
+		zap.L().Info("Username is empty")
+		return true
+	} else if newUser.Password == "" {
+		zap.L().Info("Password is empty")
+		return true
+	} else if newUser.FullName == "" {
+		zap.L().Info("Fullname is empty")
+		return true
+	} else if newUser.Class <= 0 || newUser.Class > 12 {
+		zap.L().Info("Class constraint failed")
+		return true
+	} else if newUser.Email != "" && util.IsValidEmail(newUser.Email) {
+		zap.L().Info("Not a valid email")
+		return true
+	} else if newUser.Role != "teacher" && newUser.Role != "student" {
+		zap.L().Info("Not a valid role")
+		return true
+	}
+	return false
 }
 
 func CreateSchema(db *pg.DB) error {
@@ -39,10 +64,10 @@ func CreateSchema(db *pg.DB) error {
 			IfNotExists: true,
 		})
 		if err != nil {
-			log.Fatal(err)
+			zap.L().Fatal("Error creating schema", zap.Error(err))
 			return err
 		} else {
-			fmt.Printf("Schema create for %T\n", model)
+			zap.L().Info("Schema created for ", zap.String("type", fmt.Sprintf("%T", model)))
 		}
 	}
 	return nil

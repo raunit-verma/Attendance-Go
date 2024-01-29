@@ -1,51 +1,49 @@
 package restHandler
 
 import (
+	"attendance/repository"
 	auth "attendance/services"
+	"attendance/util"
 	"encoding/json"
-	"fmt"
 	"net/http"
+
+	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
-
-type NewUser struct {
-	UserName string `json:"username"`
-	Password string `json:"password"`
-	FullName string `json:"fullname"`
-	Class    int    `json:"class"`
-	Email    string `json:"email"`
-	Type     string `json:"type"`
-}
-
-func (newUser NewUser) VerifyNewUserData() bool {
-	if newUser.UserName != "" && newUser.Password != "" && newUser.FullName != "" && newUser.Email != "" && (newUser.Type == "teacher" || newUser.Type == "student") && newUser.Class != 0 {
-		return true
-	}
-	return false
-}
 
 func AddNewUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	status, username := auth.VerifyToken(r)
-
+	status, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		return
 	}
 
-	// verify is user is principal using the username
-	fmt.Println(username)
-
-	newUser := NewUser{}
+	newUser := repository.User{
+		UserID: uuid.New().String(),
+		Email:  "",
+	}
 	err := json.NewDecoder(r.Body).Decode(&newUser)
-
 	if err != nil {
+		zap.L().Error("Cannot decode json data for newUser", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// checking if all data is present
+	util.TrimSpacesFromStruct(&newUser)
+	if newUser.IsNewUserDataMissing() {
+		zap.L().Error("New user data is missing")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
+	err = repository.AddNewUser(&newUser)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	zap.L().Info("New user added succesfully.")
 	w.WriteHeader(http.StatusAccepted)
-
 	return
 }

@@ -13,6 +13,5 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(status)
 		return
 	}
-	fmt.Println(username)
 	w.Write([]byte(fmt.Sprintf("Welcome %v", username)))
 }

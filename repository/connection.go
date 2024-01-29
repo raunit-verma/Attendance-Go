@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"log"
 	"os"
 
 	"github.com/go-pg/pg"
+	"go.uber.org/zap"
 )
 
 type DbConfig struct {
@@ -16,6 +16,7 @@ type DbConfig struct {
 
 var pgDb *pg.DB = nil
 
+// remove use of contansts and use utils ( bin )
 func GetDB() *pg.DB {
 	DbConfig := DbConfig{
 		User:     os.Getenv("DB_USER"),
@@ -38,13 +39,12 @@ func ConnectToDB(dbConfig DbConfig) *pg.DB {
 		Database: dbConfig.Database,
 	}
 
-	var db *pg.DB = pg.Connect(opts)
+	db := pg.Connect(opts)
 
 	if db == nil {
-		log.Printf("Database connection failed.\n")
-		os.Exit(100)
+		zap.L().Fatal("Database connection failed")
+	} else {
+		zap.L().Info("Database connected", zap.String("type", db.String()))
 	}
-
-	log.Printf("Postgres Connected\n")
 	return db
 }
