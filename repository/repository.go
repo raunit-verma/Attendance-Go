@@ -93,7 +93,7 @@ func GetTeacherAttendance(username string) []Attendance {
 	return attendances
 }
 
-func GetStudentAttendances(data GetStudentAttendanceJSON) []StudentAttendanceJSON {
+func GetClassAttendance(data GetClassAttendanceJSON) []StudentAttendanceJSON {
 	db := GetDB()
 	var results []StudentAttendanceJSON
 
@@ -112,5 +112,23 @@ func GetStudentAttendances(data GetStudentAttendanceJSON) []StudentAttendanceJSO
 		zap.L().Error("Error in retrieving particular class attendance ", zap.Error(err))
 		return nil
 	}
+	return results
+}
+
+func GetStudentAttendance(username string, data GetStudentAttendanceJSON) []Attendance {
+	db := GetDB()
+	var results []Attendance
+	query := `SELECT * FROM public.attendances WHERE username = ? AND punch_in_date BETWEEN ? AND ?;`
+
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
+
+	_, err := db.Query(&results, query, username, startDate, endDate)
+
+	if err != nil {
+		zap.L().Error("Error in retrieving particular student attendance "+username, zap.Error(err))
+		return nil
+	}
+
 	return results
 }

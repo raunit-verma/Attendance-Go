@@ -19,7 +19,7 @@ type User struct {
 
 type Attendance struct {
 	Username     string    `pg:"username" json:"-"`
-	AttendanceID string    `pg:"attendance_id,pk"`
+	AttendanceID string    `pg:"attendance_id,pk" json:"-"`
 	PunchInDate  time.Time `pg:"punch_in_date"`
 	PunchOutDate time.Time `pg:"punch_out_date"`
 }
@@ -40,9 +40,14 @@ type StudentAttendanceJSON struct {
 	FullName string
 }
 
-type GetStudentAttendanceJSON struct {
+type GetClassAttendanceJSON struct {
 	Class int `json:"class"`
 	Day   int `json:"day"`
+	Month int `json:"month"`
+	Year  int `json:"year"`
+}
+
+type GetStudentAttendanceJSON struct {
 	Month int `json:"month"`
 	Year  int `json:"year"`
 }
