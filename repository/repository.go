@@ -6,17 +6,17 @@ import (
 	"go.uber.org/zap"
 )
 
-func CheckIfUserExists(username string) *User {
+func GetUser(username string) *User {
 	db := GetDB()
-	user := User{
-		Username: username,
-	}
+	user := &User{}
 
-	err := db.Model(user).WherePK().Select()
+	err := db.Model(user).Where("username=?", username).Select()
+
 	if err != nil {
+		zap.L().Info(fmt.Sprintf("Username %v doesn't exist", username))
 		return nil
 	}
-	return &user
+	return user
 }
 
 func AddNewUser(user *User) error {

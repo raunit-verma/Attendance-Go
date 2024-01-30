@@ -1,8 +1,8 @@
 package restHandler
 
 import (
+	auth "attendance/api/auth"
 	"attendance/repository"
-	auth "attendance/services"
 	"attendance/util"
 	"encoding/json"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 
 func AddNewUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	status, _ := auth.VerifyToken(r)
+	status, username := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		return
@@ -23,6 +23,7 @@ func AddNewUserHandler(w http.ResponseWriter, r *http.Request) {
 		UserID: uuid.New().String(),
 		Email:  "",
 	}
+
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
 		zap.L().Error("Cannot decode json data for newUser", zap.Error(err))
@@ -34,6 +35,13 @@ func AddNewUserHandler(w http.ResponseWriter, r *http.Request) {
 	if newUser.IsNewUserDataMissing() {
 		zap.L().Error("New user data is missing")
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	user := repository.GetUser(username)
+	if user.Role != "principal" {
+		zap.L().Warn("Unauthorized to add new user")
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 

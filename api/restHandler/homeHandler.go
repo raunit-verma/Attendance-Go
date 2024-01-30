@@ -1,7 +1,7 @@
 package restHandler
 
 import (
-	auth "attendance/services"
+	auth "attendance/api/auth"
 	"fmt"
 	"net/http"
 )

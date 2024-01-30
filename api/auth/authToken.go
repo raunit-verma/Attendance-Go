@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"attendance/repository"
+	"attendance/util"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -30,14 +32,15 @@ func CreateToken(r *http.Request) (int, string) {
 	var credentials Credentials
 
 	err := json.NewDecoder(r.Body).Decode(&credentials)
+	util.TrimSpacesFromStruct(&credentials)
 
 	if err != nil {
 		return http.StatusBadRequest, ""
 	}
 
-	expectedPassword, ok := users[credentials.Username]
+	user := repository.GetUser(credentials.Username)
 
-	if !ok || expectedPassword != credentials.Password {
+	if user == nil || user.Password != credentials.Password {
 		return http.StatusUnauthorized, ""
 	}
 
