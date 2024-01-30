@@ -7,7 +7,6 @@ import (
 )
 
 func PunchInHandler(w http.ResponseWriter, r *http.Request) {
-
 	status, username := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
@@ -18,6 +17,13 @@ func PunchInHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func PunchOutHandler() {
+func PunchOutHandler(w http.ResponseWriter, r *http.Request) {
+	status, username := auth.VerifyToken(r)
+	if status != http.StatusAccepted {
+		w.WriteHeader(status)
+		return
+	}
+	services.PunchOutService(username, w, r)
 
+	return
 }

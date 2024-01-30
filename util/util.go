@@ -57,13 +57,16 @@ func GetCurrentIndianTime() time.Time {
 }
 
 // Formate Date Time to Required Format
-func FormateDateTime(year int, month time.Month, date int, hour int, min int, sec int) string {
+func FormateDateTime(year int, month time.Month, date int, hour int, min int, sec int) (string, time.Time) {
 	punchInDate := time.Date(year, month, date, hour, min, sec, 0, time.UTC)
 	indiaTimeZone, err := time.LoadLocation(TimeZone)
 	if err != nil {
-		fmt.Println("Error loading time zone:", err)
-		return ""
+		zap.L().Error("Error loading time zone")
+		return "", time.Now()
 	}
 	punchInDateIST := punchInDate.In(indiaTimeZone)
-	return punchInDateIST.Format("2006-01-02 15:04:05-07:00")
+	layout := "2006-01-02 15:04:05-07:00"
+	timeString := punchInDateIST.Format(layout)
+	parsedTime, err := time.Parse(layout, timeString)
+	return timeString, parsedTime
 }

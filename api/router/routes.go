@@ -25,6 +25,10 @@ func NewMUXRouter() *mux.Router {
 
 	// Route for Punch-in and Punch-out
 	r.HandleFunc("/punchIn", restHandler.PunchInHandler).Methods("GET")
+	r.HandleFunc("/punchOut", restHandler.PunchOutHandler).Methods("GET")
+
+	// Route for Teacher attendence for particular month accessible by Principal and Teacher
+	r.HandleFunc("/getTeacherAttendance", restHandler.GetTeacherAttendanceHandler).Methods("POST")
 
 	return r
 }

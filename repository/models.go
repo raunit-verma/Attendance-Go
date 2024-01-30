@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-pg/pg"
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -19,10 +18,21 @@ type User struct {
 }
 
 type Attendance struct {
-	Username     string
-	AttendanceID uuid.UUID
-	PunchInDate  time.Time
-	PunchOutDate time.Time
+	Username     string    `pg:"username" json:"-"`
+	AttendanceID string    `pg:"attendance_id,pk" json:"-"`
+	PunchInDate  time.Time `pg:"punch_in_date"`
+	PunchOutDate time.Time `pg:"punch_out_date"`
+}
+
+type AttendanceJSON struct {
+	PunchInDate  time.Time `pg:"punch_in_date"`
+	PunchOutDate time.Time `pg:"punch_out_date"`
+}
+
+type GetTeacherAttendanceJSON struct {
+	ID    string `json:"id"`
+	Month int    `json:"month"`
+	Year  int    `json:"year"`
 }
 
 func (newUser User) IsNewUserDataMissing() bool {
@@ -50,13 +60,12 @@ func (newUser User) IsNewUserDataMissing() bool {
 
 func CreateSchema(db *pg.DB) error {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS "users" (
-		"username" VARCHAR(255),
+		"username" VARCHAR(255) PRIMARY KEY,
 		"password" VARCHAR(255),
 		"full_name" VARCHAR(255),
 		"class" INTEGER,
 		"email" VARCHAR(255),
-		"role" VARCHAR(255),
-		PRIMARY KEY ("username")
+		"role" VARCHAR(255)
 	  );`)
 
 	if err != nil {
@@ -68,10 +77,9 @@ func CreateSchema(db *pg.DB) error {
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS "attendances" (
 		"username" VARCHAR(255),
-		"attendance_id" VARCHAR(255),
+		"attendance_id" VARCHAR(255) PRIMARY KEY,
 		"punch_in_date" TIMESTAMP WITH TIME ZONE,
-		"punch_out_date" TIMESTAMP WITH TIME ZONE,
-		PRIMARY KEY ("attendance_id")
+		"punch_out_date" TIMESTAMP WITH TIME ZONE
 	  );
 	  `)
 
@@ -95,4 +103,23 @@ func CreateSchema(db *pg.DB) error {
 	}
 
 	return nil
+
+	// models := []interface{}{
+	// 	(*User)(nil),
+	// 	(*Attendance)(nil),
+	// }
+
+	// for _, model := range models {
+	// 	err := db.Model(model).CreateTable(&orm.CreateTableOptions{
+	// 		Temp:        false,
+	// 		IfNotExists: true,
+	// 	})
+	// 	if err != nil {
+	// 		zap.L().Fatal("Error creating schema", zap.Error(err))
+	// 		return err
+	// 	} else {
+	// 		zap.L().Info("Schema created for ", zap.String("type", fmt.Sprintf("%T", model)))
+	// 	}
+	// }
+	// return nil
 }
