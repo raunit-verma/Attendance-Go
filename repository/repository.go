@@ -92,3 +92,25 @@ func GetTeacherAttendance(username string) []Attendance {
 
 	return attendances
 }
+
+func GetStudentAttendances(data GetStudentAttendanceJSON) []StudentAttendanceJSON {
+	db := GetDB()
+	var results []StudentAttendanceJSON
+
+	query := `select distinct u.username,u.full_name
+	FROM users u
+	JOIN attendances a ON u.username = a.username 
+	where u.class=? and 
+	(punch_in_date BETWEEN ? AND ?) ;`
+
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 23, 59, 59)
+
+	_, err := db.Query(&results, query, data.Class, startDate, endDate)
+
+	if err != nil {
+		zap.L().Error("Error in retrieving particular class attendance ", zap.Error(err))
+		return nil
+	}
+	return results
+}

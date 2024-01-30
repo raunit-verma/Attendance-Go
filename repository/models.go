@@ -19,7 +19,7 @@ type User struct {
 
 type Attendance struct {
 	Username     string    `pg:"username" json:"-"`
-	AttendanceID string    `pg:"attendance_id,pk" json:"-"`
+	AttendanceID string    `pg:"attendance_id,pk"`
 	PunchInDate  time.Time `pg:"punch_in_date"`
 	PunchOutDate time.Time `pg:"punch_out_date"`
 }
@@ -33,6 +33,18 @@ type GetTeacherAttendanceJSON struct {
 	ID    string `json:"id"`
 	Month int    `json:"month"`
 	Year  int    `json:"year"`
+}
+
+type StudentAttendanceJSON struct {
+	Username string
+	FullName string
+}
+
+type GetStudentAttendanceJSON struct {
+	Class int `json:"class"`
+	Day   int `json:"day"`
+	Month int `json:"month"`
+	Year  int `json:"year"`
 }
 
 func (newUser User) IsNewUserDataMissing() bool {

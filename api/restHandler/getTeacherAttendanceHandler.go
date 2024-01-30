@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func ValidateTeacherRequestDate(data repository.GetTeacherAttendanceJSON) bool {
+func ValidateTeacherRequestData(data repository.GetTeacherAttendanceJSON) bool {
 	if data.ID == "" {
 		zap.L().Info("Teacher id is null")
 		return true
@@ -39,7 +39,7 @@ func GetTeacherAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ValidateTeacherRequestDate(newTeacherAttendanceRequest) {
+	if ValidateTeacherRequestData(newTeacherAttendanceRequest) {
 		zap.L().Info("Teacher attendance request data validation failed.")
 		return
 	}
