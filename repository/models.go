@@ -69,8 +69,8 @@ func CreateSchema(db *pg.DB) error {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS "attendances" (
 		"username" VARCHAR(255),
 		"attendance_id" VARCHAR(255),
-		"punch_in_date" DATE,
-		"punch_out_date" DATE,
+		"punch_in_date" TIMESTAMP WITH TIME ZONE,
+		"punch_out_date" TIMESTAMP WITH TIME ZONE,
 		PRIMARY KEY ("attendance_id")
 	  );
 	  `)

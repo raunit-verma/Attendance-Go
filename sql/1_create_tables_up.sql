@@ -9,10 +9,10 @@ CREATE TABLE IF NOT EXISTS "users" (
 );
 
 CREATE TABLE IF NOT EXISTS "attendances" (
-  "user_id" VARCHAR(255),
+  "username" VARCHAR(255),
   "attendance_id" VARCHAR(255),
-  "punch_in_date" DATE,
-  "punch_out_date" DATE,
+  "punch_in_date" TIMESTAMP WITH TIME ZONE,
+  "punch_out_date" TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY ("attendance_id")
 );
 

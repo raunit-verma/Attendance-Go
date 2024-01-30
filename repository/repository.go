@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -27,4 +28,19 @@ func AddNewUser(user *User) error {
 		return err
 	}
 	return nil
+}
+
+func GetCurrentStatus(username string) bool {
+	currentTimeUTC := time.Now().UTC()
+	indiaTimeZone, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		zap.L().Info("Error loading Indian timezone")
+	}
+	currentTimeIndia := currentTimeUTC.In(indiaTimeZone)
+	fmt.Print(currentTimeIndia)
+	return false
+}
+
+func AddNewPunchIn(attendance *Attendance) {
+
 }

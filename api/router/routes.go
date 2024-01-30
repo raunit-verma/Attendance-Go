@@ -22,5 +22,9 @@ func NewMUXRouter() *mux.Router {
 
 	// Route for adding new users
 	r.HandleFunc("/addNewUser", restHandler.AddNewUserHandler).Methods("POST")
+
+	// Route for Punch-in and Punch-out
+	r.HandleFunc("/punchIn", restHandler.PunchInHandler).Methods("GET")
+
 	return r
 }
