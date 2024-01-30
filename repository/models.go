@@ -9,9 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// write sql scripts
 type User struct {
-	UserID   string
 	Username string `json:"username"`
 	Password string `json:"password"`
 	FullName string `json:"fullname"`
@@ -21,7 +19,7 @@ type User struct {
 }
 
 type Attendance struct {
-	UserID       string
+	Username     string
 	AttendanceID uuid.UUID
 	PunchInDate  time.Time
 	PunchOutDate time.Time
@@ -51,18 +49,14 @@ func (newUser User) IsNewUserDataMissing() bool {
 }
 
 func CreateSchema(db *pg.DB) error {
-	// models := []interface{}{
-	// 	(*User)(nil),
-	// 	(*Attendance)(nil),
-	// }
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS "users" (
-		"user_id" VARCHAR(255),
+		"username" VARCHAR(255),
 		"password" VARCHAR(255),
 		"full_name" VARCHAR(255),
 		"class" INTEGER,
 		"email" VARCHAR(255),
 		"role" VARCHAR(255),
-		PRIMARY KEY ("user_id")
+		PRIMARY KEY ("username")
 	  );`)
 
 	if err != nil {
@@ -73,7 +67,7 @@ func CreateSchema(db *pg.DB) error {
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS "attendances" (
-		"user_id" VARCHAR(255),
+		"username" VARCHAR(255),
 		"attendance_id" VARCHAR(255),
 		"punch_in_date" DATE,
 		"punch_out_date" DATE,
@@ -88,7 +82,7 @@ func CreateSchema(db *pg.DB) error {
 		zap.L().Info("Schema created for attendance")
 	}
 
-	_, err = db.Exec(`ALTER TABLE IF EXISTS "attendances" ADD CONSTRAINT "fk_user_attendance" FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");`)
+	_, err = db.Exec(`ALTER TABLE IF EXISTS "attendances" ADD CONSTRAINT "fk_user_attendance" FOREIGN KEY ("username") REFERENCES "users" ("username");`)
 	pgErr, ok := err.(pg.Error)
 
 	if ok && pgErr.Field('C') == "42710" {
@@ -100,17 +94,5 @@ func CreateSchema(db *pg.DB) error {
 		zap.L().Info("Foreign key created")
 	}
 
-	// for _, model := range models {
-	// 	err := db.Model(model).CreateTable(&orm.CreateTableOptions{
-	// 		Temp:        false,
-	// 		IfNotExists: true,
-	// 	})
-	// 	if err != nil {
-	// 		zap.L().Fatal("Error creating schema", zap.Error(err))
-	// 		return err
-	// 	} else {
-	// 		zap.L().Info("Schema created for ", zap.String("type", fmt.Sprintf("%T", model)))
-	// 	}
-	// }
 	return nil
 }

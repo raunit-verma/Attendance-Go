@@ -23,8 +23,7 @@ func AddNewUser(user *User) error {
 	db := GetDB()
 	_, err := db.Model(user).Insert()
 	if err != nil {
-		zap.L().Error("Error adding new user to db", zap.Error(err))
-		fmt.Println(err)
+		zap.L().Info("Error adding new user to DB.", zap.Error(err))
 		return err
 	}
 	return nil
