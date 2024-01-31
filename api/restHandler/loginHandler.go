@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -17,12 +19,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "Authorization",
-		Value:   tokenString,
-		Expires: time.Now().Add(time.Hour * 24),
+		Name:     "Authorization",
+		Value:    tokenString,
+		Expires:  time.Now().Add(time.Hour * 24),
+		HttpOnly: false,
+		Secure:   false,
+		// Domain:   os.Getenv("DOMAIN"), // production
+		Domain: "",
+		Path:   "/",
 	})
 	user := repository.GetUser(username)
 	user.Password = ""
 	json.NewEncoder(w).Encode(user)
-	w.WriteHeader(status)
+	zap.L().Info("User logged in", zap.String("username", user.Username))
 }

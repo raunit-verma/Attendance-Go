@@ -4,8 +4,10 @@ import (
 	"attendance/api/router"
 	"attendance/repository"
 	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"go.uber.org/zap"
 )
 
@@ -21,10 +23,16 @@ func main() {
 	}
 
 	serverConfig := router.ServerConfig{
-		Port: ":1025",
+		Port: os.Getenv("PORT"),
 	}
 
 	r := router.NewMUXRouter()
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{os.Getenv("URL")},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(r)
 
 	db := repository.GetDB()
 	defer db.Close()
@@ -32,7 +40,7 @@ func main() {
 
 	zap.L().Info(`Server starting on Port ` + serverConfig.Port)
 
-	if err := http.ListenAndServe(serverConfig.Port, r); err != nil {
+	if err := http.ListenAndServe(serverConfig.Port, handler); err != nil {
 		zap.L().Fatal("HTTP server failed to start at Port "+serverConfig.Port, zap.Error((err)))
 	}
 }

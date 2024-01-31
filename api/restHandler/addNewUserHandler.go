@@ -18,9 +18,7 @@ func AddNewUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newUser := repository.User{
-		Email: "",
-	}
+	newUser := repository.User{}
 
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {

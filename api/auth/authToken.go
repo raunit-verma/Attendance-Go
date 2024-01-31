@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"go.uber.org/zap"
 )
 
 var jwtKey = []byte("Raunit-Verma")
@@ -35,12 +36,14 @@ func CreateToken(r *http.Request) (int, string, string) {
 	util.TrimSpacesFromStruct(&credentials)
 
 	if err != nil {
+		zap.L().Error("Cannot decode username and password", zap.Error(err))
 		return http.StatusBadRequest, "", ""
 	}
 
 	user := repository.GetUser(credentials.Username)
 
 	if user == nil || user.Password != credentials.Password {
+		zap.L().Info("Wrong username or password", zap.String("Data", user.Username))
 		return http.StatusUnauthorized, "", ""
 	}
 
@@ -58,6 +61,7 @@ func CreateToken(r *http.Request) (int, string, string) {
 	tokenString, err := token.SignedString(jwtKey)
 
 	if err != nil {
+		zap.L().Error("Couldn't create token string", zap.Error(err))
 		return http.StatusInternalServerError, "", ""
 	}
 
@@ -69,8 +73,10 @@ func VerifyToken(r *http.Request) (int, string) {
 
 	if err != nil {
 		if err == http.ErrNoCookie {
+			zap.L().Error("No Cookie found", zap.Error(err))
 			return http.StatusUnauthorized, ""
 		}
+		zap.L().Error("Cannot retrieve cookie", zap.Error(err))
 		return http.StatusBadRequest, ""
 	}
 
@@ -83,13 +89,17 @@ func VerifyToken(r *http.Request) (int, string) {
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
+			zap.L().Error("Invalid token", zap.Error(err))
 			return http.StatusUnauthorized, ""
 		}
+		zap.L().Error("Error verifying token", zap.Error(err))
 		return http.StatusBadRequest, ""
 	}
 
 	if !token.Valid {
+		zap.L().Error("Token not valid")
 		return http.StatusUnauthorized, ""
 	}
+	zap.L().Info("Token verified", zap.String("user", claims.Username))
 	return http.StatusAccepted, claims.Username
 }
