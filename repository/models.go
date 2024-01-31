@@ -10,10 +10,10 @@ import (
 
 type User struct {
 	Username string `json:"username"`
-	Password string `json:"password"`
+	Password string `json:"password,omitempty"`
 	FullName string `json:"fullname"`
 	Class    int    `json:"class"`
-	Email    string `json:"email"`
+	Email    string `json:"email,omitempty"`
 	Role     string `json:"role"`
 }
 
@@ -36,8 +36,9 @@ type GetTeacherAttendanceJSON struct {
 }
 
 type StudentAttendanceJSON struct {
-	Username string
-	FullName string
+	TableName struct{} `sql:"users" json:"-"`
+	Username  string   `pg:"username"`
+	FullName  string   `pg:"full_name"`
 }
 
 type GetClassAttendanceJSON struct {

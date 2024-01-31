@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetTeacherAttendanceService(username string, teacherId string, w http.ResponseWriter, r *http.Request) {
+func GetTeacherAttendanceService(username string, teacherId string, data repository.GetTeacherAttendanceJSON, w http.ResponseWriter, r *http.Request) {
 	user := repository.GetUser(username)
 
 	if user.Role != "principal" && user.Role != "teacher" {
@@ -18,7 +18,7 @@ func GetTeacherAttendanceService(username string, teacherId string, w http.Respo
 		teacherId = user.Username
 	}
 
-	allAttendances := repository.GetTeacherAttendance(teacherId)
+	allAttendances := repository.GetTeacherAttendance(teacherId, data)
 	json.NewEncoder(w).Encode(allAttendances)
 
 }

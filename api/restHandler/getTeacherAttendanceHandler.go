@@ -44,6 +44,6 @@ func GetTeacherAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	services.GetTeacherAttendanceService(username, newTeacherAttendanceRequest.ID, w, r)
+	services.GetTeacherAttendanceService(username, newTeacherAttendanceRequest.ID, newTeacherAttendanceRequest, w, r)
 	return
 }

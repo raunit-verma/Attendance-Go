@@ -2,12 +2,14 @@ package restHandler
 
 import (
 	auth "attendance/api/auth"
+	"attendance/repository"
+	"encoding/json"
 	"net/http"
 	"time"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	status, tokenString := auth.CreateToken(r)
+	status, tokenString, username := auth.CreateToken(r)
 
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
@@ -19,5 +21,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Value:   tokenString,
 		Expires: time.Now().Add(time.Hour * 24),
 	})
+	user := repository.GetUser(username)
+	user.Password = ""
+	json.NewEncoder(w).Encode(user)
 	w.WriteHeader(status)
 }

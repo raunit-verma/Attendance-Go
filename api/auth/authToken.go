@@ -27,7 +27,7 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-func CreateToken(r *http.Request) (int, string) {
+func CreateToken(r *http.Request) (int, string, string) {
 
 	var credentials Credentials
 
@@ -35,13 +35,13 @@ func CreateToken(r *http.Request) (int, string) {
 	util.TrimSpacesFromStruct(&credentials)
 
 	if err != nil {
-		return http.StatusBadRequest, ""
+		return http.StatusBadRequest, "", ""
 	}
 
 	user := repository.GetUser(credentials.Username)
 
 	if user == nil || user.Password != credentials.Password {
-		return http.StatusUnauthorized, ""
+		return http.StatusUnauthorized, "", ""
 	}
 
 	expirationtime := time.Now().Add(time.Hour * 24)
@@ -58,10 +58,10 @@ func CreateToken(r *http.Request) (int, string) {
 	tokenString, err := token.SignedString(jwtKey)
 
 	if err != nil {
-		return http.StatusInternalServerError, ""
+		return http.StatusInternalServerError, "", ""
 	}
 
-	return http.StatusAccepted, tokenString
+	return http.StatusAccepted, tokenString, user.Username
 }
 
 func VerifyToken(r *http.Request) (int, string) {

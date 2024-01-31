@@ -80,10 +80,14 @@ func AddNewPunchOut(username string, attendance Attendance) error {
 	return nil
 }
 
-func GetTeacherAttendance(username string) []Attendance {
+func GetTeacherAttendance(username string, data GetTeacherAttendanceJSON) []Attendance {
 	db := GetDB()
 	var attendances []Attendance
-	err := db.Model(&attendances).Where("username=?", username).Select()
+
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
+
+	err := db.Model(&attendances).Where("username=?", username).Where("a.punch_in_date BETWEEN ? AND ?", startDate, endDate).Select()
 
 	if err != nil {
 		zap.L().Error("Cannot retrieve data for teacher "+username, zap.Error(err))
@@ -97,18 +101,21 @@ func GetClassAttendance(data GetClassAttendanceJSON) []StudentAttendanceJSON {
 	db := GetDB()
 	var results []StudentAttendanceJSON
 
-	query := `select distinct u.username,u.full_name
-	FROM users u
-	JOIN attendances a ON u.username = a.username 
-	where u.class=? and 
-	(punch_in_date BETWEEN ? AND ?) ;`
-
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 23, 59, 59)
 
-	_, err := db.Query(&results, query, data.Class, startDate, endDate)
+	err := db.Model(&results).
+		ColumnExpr("DISTINCT users.username").
+		Column("users.full_name").
+		Join("JOIN attendances a ON users.username = a.username").
+		Table("users").
+		Where("users.class = ?", data.Class).
+		Where("a.punch_in_date BETWEEN ? AND ?", startDate, endDate).
+		Where("user.role=?", "student").
+		Select()
 
 	if err != nil {
+		fmt.Println(err)
 		zap.L().Error("Error in retrieving particular class attendance ", zap.Error(err))
 		return nil
 	}
@@ -118,12 +125,11 @@ func GetClassAttendance(data GetClassAttendanceJSON) []StudentAttendanceJSON {
 func GetStudentAttendance(username string, data GetStudentAttendanceJSON) []Attendance {
 	db := GetDB()
 	var results []Attendance
-	query := `SELECT * FROM public.attendances WHERE username = ? AND punch_in_date BETWEEN ? AND ?;`
 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
-	_, err := db.Query(&results, query, username, startDate, endDate)
+	err := db.Model(&results).Where("username=?", username).Where("punch_in_date BETWEEN ? AND ?", startDate, endDate).Select()
 
 	if err != nil {
 		zap.L().Error("Error in retrieving particular student attendance "+username, zap.Error(err))
