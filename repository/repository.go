@@ -16,8 +16,7 @@ func GetUser(username string) *User {
 	err := db.Model(user).Where("username=?", username).Select()
 
 	if err != nil {
-		zap.L().Info(fmt.Sprintf("Username %v doesn't exist", username))
-		return nil
+		zap.L().Info("No record found in DB", zap.String("username", username))
 	}
 	return user
 }
@@ -87,7 +86,7 @@ func GetTeacherAttendance(username string, data GetTeacherAttendanceJSON) []Atte
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
-	err := db.Model(&attendances).Where("username=?", username).Where("a.punch_in_date BETWEEN ? AND ?", startDate, endDate).Select()
+	err := db.Model(&attendances).Where("username=?", username).Where("punch_in_date BETWEEN ? AND ?", startDate, endDate).Select()
 
 	if err != nil {
 		zap.L().Error("Cannot retrieve data for teacher "+username, zap.Error(err))
@@ -125,7 +124,6 @@ func GetClassAttendance(data GetClassAttendanceJSON) []StudentAttendanceJSON {
 func GetStudentAttendance(username string, data GetStudentAttendanceJSON) []Attendance {
 	db := GetDB()
 	var results []Attendance
-
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 

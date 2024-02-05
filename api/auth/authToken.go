@@ -20,12 +20,16 @@ var users = map[string]string{
 
 type Claims struct {
 	Username string `json:"username"`
+	FullName string `json:"fullname"`
+	Class    int    `json:"class"`
+	Email    string `json:"email,omitempty"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
 type Credentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 func CreateToken(r *http.Request) (int, string, string) {
@@ -42,8 +46,8 @@ func CreateToken(r *http.Request) (int, string, string) {
 
 	user := repository.GetUser(credentials.Username)
 
-	if user == nil || user.Password != credentials.Password {
-		zap.L().Info("Wrong username or password", zap.String("Data", user.Username))
+	if user.Username != credentials.Username || user.Password != credentials.Password || user.Username == "" || user.Password == "" {
+		zap.L().Info("Wrong username or password", zap.String("Passed Credentials", user.Username))
 		return http.StatusUnauthorized, "", ""
 	}
 
@@ -51,6 +55,10 @@ func CreateToken(r *http.Request) (int, string, string) {
 
 	claims := &Claims{
 		Username: credentials.Username,
+		FullName: user.FullName,
+		Email:    user.Email,
+		Class:    user.Class,
+		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationtime),
 		},

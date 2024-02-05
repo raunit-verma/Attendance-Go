@@ -3,6 +3,7 @@ package services
 import (
 	"attendance/repository"
 	"attendance/util"
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-pg/pg"
@@ -11,9 +12,8 @@ import (
 
 func AddNewUserService(newUser repository.User, username string, w http.ResponseWriter, r *http.Request) {
 	util.TrimSpacesFromStruct(&newUser)
-	if newUser.IsNewUserDataMissing() {
+	if newUser.IsNewUserDataMissing(w, r) {
 		zap.L().Error("New user data is missing")
-		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -28,7 +28,8 @@ func AddNewUserService(newUser repository.User, username string, w http.Response
 	pgErr, ok := err.(pg.Error)
 	if err != nil {
 		if ok && pgErr.Field('C') == "23505" {
-			w.WriteHeader(http.StatusConflict)
+			json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 4, Message: util.Four})
+			zap.L().Error("Username already exist", zap.String("username", newUser.Username))
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)

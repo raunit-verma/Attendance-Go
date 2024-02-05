@@ -20,6 +20,9 @@ func NewMUXRouter() *mux.Router {
 	// Route for accepting username and password
 	r.HandleFunc("/login", restHandler.LoginHandler).Methods("POST")
 
+	// Route to verify token
+	r.HandleFunc("/verify", restHandler.VerifyToken).Methods("GET")
+
 	// Route for adding new users
 	r.HandleFunc("/addNewUser", restHandler.AddNewUserHandler).Methods("POST")
 
