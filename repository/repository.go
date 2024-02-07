@@ -38,11 +38,15 @@ func GetCurrentStatus(username string) (bool, []Attendance) {
 
 	db := GetDB()
 	var attendances []Attendance
-	db.Model(&attendances).
+	err := db.Model(&attendances).
 		Where("username = ?", username).
 		Where("punch_in_date BETWEEN ? AND ?", startDate, endDate).
 		Where("punch_out_date IS NULL").
 		Select()
+	if err != nil {
+		zap.L().Error("Error in DB operation", zap.Error(err))
+		return false, nil
+	}
 	if len(attendances) == 0 {
 		return false, nil
 	}
@@ -110,7 +114,7 @@ func GetClassAttendance(data GetClassAttendanceJSON) []StudentAttendanceJSON {
 		Table("users").
 		Where("users.class = ?", data.Class).
 		Where("a.punch_in_date BETWEEN ? AND ?", startDate, endDate).
-		Where("user.role=?", "student").
+		Where("users.role=?", "student").
 		Select()
 
 	if err != nil {

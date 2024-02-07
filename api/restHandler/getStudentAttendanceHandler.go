@@ -22,27 +22,27 @@ func ValidateStudentRequestData(data repository.GetStudentAttendanceJSON) bool {
 	return false
 }
 
-func GetStudentsAttendanceHandler(w http.ResponseWriter, r *http.Request) {
+func GetStudentAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 	status, username := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
 
-	newStudentsAttendanceRequest := repository.GetStudentAttendanceJSON{}
-	err := json.NewDecoder(r.Body).Decode(&newStudentsAttendanceRequest)
+	newStudentAttendanceRequest := repository.GetStudentAttendanceJSON{}
+	err := json.NewDecoder(r.Body).Decode(&newStudentAttendanceRequest)
 	if err != nil {
 		zap.L().Error("Cannot decode json data for student attendance request", zap.Error(err))
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.CannotDecodePayload_Two, ErrorCode: 2})
 		return
 	}
 
-	if ValidateStudentRequestData(newStudentsAttendanceRequest) {
+	if ValidateStudentRequestData(newStudentAttendanceRequest) {
 		zap.L().Info("Student attendance request data validation failed.")
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.RequestDataValidation_Five, ErrorCode: 5})
 		return
 	}
 
-	services.GetStudentAttendanceService(username, newStudentsAttendanceRequest, w, r)
+	services.GetStudentAttendanceService(username, newStudentAttendanceRequest, w, r)
 	return
 }

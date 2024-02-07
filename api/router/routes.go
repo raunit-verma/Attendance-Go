@@ -37,7 +37,9 @@ func NewMUXRouter() *mux.Router {
 	r.HandleFunc("/getClassAttendance", restHandler.GetClassAttendanceHandler).Methods("POST")
 
 	// Route to get particular student attendance for month and year
-	r.HandleFunc("/getStudentAttendance", restHandler.GetStudentsAttendanceHandler).Methods("POST")
+	r.HandleFunc("/getStudentAttendance", restHandler.GetStudentAttendanceHandler).Methods("POST")
 
+	// Route to get currentStatus of any user
+	r.HandleFunc("/fetchStatus", restHandler.FetchStatus).Methods("Get")
 	return r
 }
