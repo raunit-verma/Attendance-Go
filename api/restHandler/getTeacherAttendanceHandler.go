@@ -4,6 +4,7 @@ import (
 	auth "attendance/api/auth"
 	"attendance/repository"
 	"attendance/services"
+	"attendance/util"
 	"encoding/json"
 	"net/http"
 
@@ -27,7 +28,7 @@ func ValidateTeacherRequestData(data repository.GetTeacherAttendanceJSON) bool {
 func GetTeacherAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 	status, username := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
-		w.WriteHeader(status)
+		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
 
@@ -35,12 +36,13 @@ func GetTeacherAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&newTeacherAttendanceRequest)
 	if err != nil {
 		zap.L().Error("Cannot decode json data for teacher attendance request", zap.Error(err))
-		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.CannotDecodePayload_Two, ErrorCode: 2})
 		return
 	}
 
 	if ValidateTeacherRequestData(newTeacherAttendanceRequest) {
 		zap.L().Info("Teacher attendance request data validation failed.")
+		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.RequestDataValidation_Five, ErrorCode: 5})
 		return
 	}
 

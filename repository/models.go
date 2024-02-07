@@ -62,28 +62,28 @@ type GetStudentAttendanceJSON struct {
 
 func (newUser User) IsNewUserDataMissing(w http.ResponseWriter, r *http.Request) bool {
 	if newUser.Username == "" {
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.Three + " Username is missing."})
+		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Username is missing."})
 		zap.L().Info("Username is empty")
 		return true
 	} else if newUser.Password == "" {
 		zap.L().Info("Password is empty")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.Three + " Password is missing."})
+		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Password is missing."})
 		return true
 	} else if newUser.FullName == "" {
 		zap.L().Info("Fullname is empty")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.Three + " Fullname is missing."})
+		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Fullname is missing."})
 		return true
 	} else if newUser.Class <= 0 || newUser.Class > 12 {
 		zap.L().Info("Class constraint failed")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.Three + " Class should be between 1 to 12."})
+		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Class should be between 1 to 12."})
 		return true
 	} else if newUser.Email != "" && !util.IsValidEmail(newUser.Email) {
 		zap.L().Info("Not a valid email")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.Three + " Email is missing."})
+		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Email is missing."})
 		return true
 	} else if newUser.Role != "teacher" && newUser.Role != "student" {
 		zap.L().Info("Not a valid role")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.Three + " Role is missing."})
+		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Role is missing."})
 		return true
 	}
 	return false
