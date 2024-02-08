@@ -46,7 +46,7 @@ func CreateToken(r *http.Request) (int, string, string) {
 
 	user := repository.GetUser(credentials.Username)
 
-	if user.Username != credentials.Username || user.Password != credentials.Password || user.Username == "" || user.Password == "" {
+	if user.Username != credentials.Username || user.Username == "" || user.Password == "" || !util.MatchPassword([]byte(user.Password), []byte(credentials.Password)) {
 		zap.L().Info("Wrong username or password", zap.String("Passed Credentials", user.Username))
 		return http.StatusUnauthorized, "", ""
 	}
@@ -108,6 +108,5 @@ func VerifyToken(r *http.Request) (int, string) {
 		zap.L().Error("Token not valid")
 		return http.StatusUnauthorized, ""
 	}
-	zap.L().Info("Token verified", zap.String("user", claims.Username))
 	return http.StatusAccepted, claims.Username
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const TimeZone = "Asia/Kolkata"
@@ -69,4 +70,23 @@ func FormateDateTime(year int, month time.Month, date int, hour int, min int, se
 	timeString := punchInDateIST.Format(layout)
 	parsedTime, err := time.Parse(layout, timeString)
 	return timeString, parsedTime
+}
+
+// Match hashed password with bcrypt
+func MatchPassword(hashedPassword []byte, password []byte) bool {
+	err := bcrypt.CompareHashAndPassword(hashedPassword, password)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+// Hash Password
+func GenerateHashFromPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		zap.L().Error("Error in creating hash from password.", zap.Error(err))
+		return "", err
+	}
+	return string(hashedPassword), nil
 }

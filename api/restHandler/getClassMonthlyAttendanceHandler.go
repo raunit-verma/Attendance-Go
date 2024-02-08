@@ -32,6 +32,7 @@ func GetClassAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 	status, username := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		zap.L().Error("User not verified", zap.String("Code", "1"))
+		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
@@ -40,12 +41,14 @@ func GetClassAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&newStudentAttendanceRequest)
 	if err != nil {
 		zap.L().Error("Cannot decode json data for student attendance request", zap.Error(err))
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.CannotDecodePayload_Two, ErrorCode: 2})
 		return
 	}
 
 	if ValidateClassRequestData(newStudentAttendanceRequest) {
 		zap.L().Info("Student attendance request data validation failed.")
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{})
 		return
 	}

@@ -14,6 +14,7 @@ func GetStudentAttendanceService(username string, data repository.GetStudentAtte
 
 	if user == nil && user.Role != "student" {
 		zap.L().Info("Not authorized to get student attendance details")
+		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One})
 		return
 	}

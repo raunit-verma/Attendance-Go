@@ -23,7 +23,13 @@ func GetUser(username string) *User {
 
 func AddNewUser(user *User) error {
 	db := GetDB()
-	_, err := db.Model(user).Insert()
+	hashedPassword, err := util.GenerateHashFromPassword(user.Password)
+	if err != nil {
+		zap.L().Info("Error in hashing password.", zap.Error(err))
+		return err
+	}
+	user.Password = hashedPassword
+	_, err = db.Model(user).Insert()
 	if err != nil {
 		zap.L().Info("Error adding new user to DB.", zap.Error(err))
 		return err

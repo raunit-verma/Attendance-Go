@@ -61,32 +61,40 @@ type GetStudentAttendanceJSON struct {
 }
 
 func (newUser User) IsNewUserDataMissing(w http.ResponseWriter, r *http.Request) bool {
+	IsDataMissing := false
+	Message := ""
+
 	if newUser.Username == "" {
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Username is missing."})
+		IsDataMissing = true
+		Message = " Username is missing."
 		zap.L().Info("Username is empty")
-		return true
 	} else if newUser.Password == "" {
+		IsDataMissing = true
 		zap.L().Info("Password is empty")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Password is missing."})
-		return true
+		Message = " Password is missing."
 	} else if newUser.FullName == "" {
+		IsDataMissing = true
 		zap.L().Info("Fullname is empty")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Fullname is missing."})
-		return true
+		Message = " Fullname is missing."
 	} else if newUser.Class <= 0 || newUser.Class > 12 {
+		IsDataMissing = true
 		zap.L().Info("Class constraint failed")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Class should be between 1 to 12."})
-		return true
+		Message = " Class should be between 1 to 12."
 	} else if newUser.Email != "" && !util.IsValidEmail(newUser.Email) {
+		IsDataMissing = true
 		zap.L().Info("Not a valid email")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Email is missing."})
-		return true
+		Message = " Email is missing or not a valid email."
 	} else if newUser.Role != "teacher" && newUser.Role != "student" {
 		zap.L().Info("Not a valid role")
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + " Role is missing."})
-		return true
+		Message = " Role is missing."
 	}
-	return false
+
+	if IsDataMissing {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + Message})
+	}
+
+	return IsDataMissing
 }
 
 func CreateSchema(db *pg.DB) error {

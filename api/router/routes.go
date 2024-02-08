@@ -24,22 +24,22 @@ func NewMUXRouter() *mux.Router {
 	r.HandleFunc("/verify", restHandler.VerifyToken).Methods("GET")
 
 	// Route for adding new users
-	r.HandleFunc("/addNewUser", restHandler.AddNewUserHandler).Methods("POST")
+	r.HandleFunc("/addnewuser", restHandler.AddNewUserHandler).Methods("POST")
 
 	// Route for Punch-in and Punch-out
-	r.HandleFunc("/punchIn", restHandler.PunchInHandler).Methods("GET")
-	r.HandleFunc("/punchOut", restHandler.PunchOutHandler).Methods("GET")
+	r.HandleFunc("/punchin", restHandler.PunchInHandler).Methods("GET")
+	r.HandleFunc("/punchout", restHandler.PunchOutHandler).Methods("GET")
 
 	// Route for Teacher attendence for particular month accessible by Principal and Teacher
-	r.HandleFunc("/getTeacherAttendance", restHandler.GetTeacherAttendanceHandler).Methods("POST")
+	r.HandleFunc("/getteacherattendance", restHandler.GetTeacherAttendanceHandler).Methods("POST")
 
 	// Route to get class attendance for day, month and year
-	r.HandleFunc("/getClassAttendance", restHandler.GetClassAttendanceHandler).Methods("POST")
+	r.HandleFunc("/getclassattendance", restHandler.GetClassAttendanceHandler).Methods("POST")
 
 	// Route to get particular student attendance for month and year
-	r.HandleFunc("/getStudentAttendance", restHandler.GetStudentAttendanceHandler).Methods("POST")
+	r.HandleFunc("/getstudentattendance", restHandler.GetStudentAttendanceHandler).Methods("POST")
 
 	// Route to get currentStatus of any user
-	r.HandleFunc("/fetchStatus", restHandler.FetchStatus).Methods("Get")
+	r.HandleFunc("/fetchstatus", restHandler.FetchStatus).Methods("Get")
 	return r
 }

@@ -11,6 +11,7 @@ func GetTeacherAttendanceService(username string, teacherId string, data reposit
 	user := repository.GetUser(username)
 
 	if user.Role != "principal" && user.Role != "teacher" {
+		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One})
 		return
 	}
@@ -20,6 +21,7 @@ func GetTeacherAttendanceService(username string, teacherId string, data reposit
 	}
 
 	allAttendances := repository.GetTeacherAttendance(teacherId, data)
+	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(allAttendances)
 
 }

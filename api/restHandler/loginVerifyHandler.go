@@ -15,6 +15,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	status, tokenString, username := auth.CreateToken(r)
 
 	if status != http.StatusAccepted {
+		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
@@ -32,6 +33,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	user := repository.GetUser(username)
 	if user.Username == "" {
 		zap.L().Info("No user found", zap.String("Username", username))
+		w.WriteHeader(http.StatusBadGateway)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.UserNotFound_Six, ErrorCode: 6})
 		return
 	}
@@ -43,6 +45,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 func VerifyToken(w http.ResponseWriter, r *http.Request) {
 	status, username := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
+		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}

@@ -12,6 +12,6 @@ require (
 	github.com/rs/cors v1.10.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/crypto v0.0.0-20190320223903-b7391e95e576 // indirect
+	golang.org/x/crypto v0.19.0 // indirect
 	mellium.im/sasl v0.3.1 // indirect
 )
