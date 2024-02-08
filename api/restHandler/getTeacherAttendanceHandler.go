@@ -11,18 +11,18 @@ import (
 	"go.uber.org/zap"
 )
 
-func ValidateTeacherRequestData(data repository.GetTeacherAttendanceJSON) bool {
+func ValidateTeacherRequestData(data repository.GetTeacherAttendanceJSON) (bool, string) {
 	if data.ID == "" {
 		zap.L().Info("Teacher id is null")
-		return true
-	} else if data.Month < 0 || data.Month > 12 {
-		zap.L().Info("Requested month is not valid")
-		return true
-	} else if data.Year <= 2020 || data.Year >= 2100 {
-		zap.L().Info("Request year is not valid")
-		return true
+		return true, "Teacher id is null. "
+	} else if data.Month <= 0 || data.Month > 12 {
+		zap.L().Info("Month is not valid")
+		return true, "Month is not valid. "
+	} else if data.Year < 2020 || data.Year >= 2100 {
+		zap.L().Info("Year is not valid")
+		return true, "Year is not valid. "
 	}
-	return false
+	return false, ""
 }
 
 func GetTeacherAttendanceHandler(w http.ResponseWriter, r *http.Request) {
@@ -41,11 +41,11 @@ func GetTeacherAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.CannotDecodePayload_Two, ErrorCode: 2})
 		return
 	}
-
-	if ValidateTeacherRequestData(newTeacherAttendanceRequest) {
+	flag, message := ValidateTeacherRequestData(newTeacherAttendanceRequest)
+	if flag {
 		zap.L().Info("Teacher attendance request data validation failed.")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.RequestDataValidation_Five, ErrorCode: 5})
+		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: message + util.RequestDataValidation_Five, ErrorCode: 5})
 		return
 	}
 

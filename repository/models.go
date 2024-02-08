@@ -67,31 +67,31 @@ func (newUser User) IsNewUserDataMissing(w http.ResponseWriter, r *http.Request)
 	if newUser.Username == "" {
 		IsDataMissing = true
 		Message = " Username is missing."
-		zap.L().Info("Username is empty")
+		zap.L().Info("Username is empty. ")
 	} else if newUser.Password == "" {
 		IsDataMissing = true
 		zap.L().Info("Password is empty")
-		Message = " Password is missing."
+		Message = " Password is missing. "
 	} else if newUser.FullName == "" {
 		IsDataMissing = true
 		zap.L().Info("Fullname is empty")
-		Message = " Fullname is missing."
+		Message = " Fullname is missing. "
 	} else if newUser.Class <= 0 || newUser.Class > 12 {
 		IsDataMissing = true
 		zap.L().Info("Class constraint failed")
-		Message = " Class should be between 1 to 12."
+		Message = " Class should be between 1 to 12. "
 	} else if newUser.Email != "" && !util.IsValidEmail(newUser.Email) {
 		IsDataMissing = true
 		zap.L().Info("Not a valid email")
-		Message = " Email is missing or not a valid email."
+		Message = " Email is missing or not a valid email. "
 	} else if newUser.Role != "teacher" && newUser.Role != "student" {
 		zap.L().Info("Not a valid role")
-		Message = " Role is missing."
+		Message = " Role is missing. "
 	}
 
 	if IsDataMissing {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: util.UserDataMissing_Three + Message})
+		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: Message + util.UserDataMissing_Three})
 	}
 
 	return IsDataMissing

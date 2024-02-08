@@ -11,15 +11,15 @@ import (
 	"go.uber.org/zap"
 )
 
-func ValidateStudentRequestData(data repository.GetStudentAttendanceJSON) bool {
+func ValidateStudentRequestData(data repository.GetStudentAttendanceJSON) (bool, string) {
 	if data.Month <= 0 || data.Month > 12 {
 		zap.L().Info("Requested month is not valid")
-		return true
+		return true, "Month is not valid. "
 	} else if data.Year <= 2020 || data.Year >= 2100 {
 		zap.L().Info("Request year is not valid")
-		return true
+		return true, "Year is not valid. "
 	}
-	return false
+	return false, ""
 }
 
 func GetStudentAttendanceHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,11 +38,11 @@ func GetStudentAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.CannotDecodePayload_Two, ErrorCode: 2})
 		return
 	}
-
-	if ValidateStudentRequestData(newStudentAttendanceRequest) {
+	flag, message := ValidateStudentRequestData(newStudentAttendanceRequest)
+	if flag {
 		zap.L().Info("Student attendance request data validation failed.")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.RequestDataValidation_Five, ErrorCode: 5})
+		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: message + util.RequestDataValidation_Five, ErrorCode: 5})
 		return
 	}
 
