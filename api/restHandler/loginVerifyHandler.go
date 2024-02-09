@@ -21,16 +21,26 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "Authorization",
-		Value:    tokenString,
-		Expires:  time.Now().Add(time.Hour * 24),
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		Domain:   os.Getenv("DOMAIN"),
-		Path:     "/",
-	})
+	if os.Getenv("TYPE") == "Production" {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "Authorization",
+			Value:    tokenString,
+			Expires:  time.Now().Add(time.Hour * 24),
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+			Domain:   os.Getenv("DOMAIN"),
+			Path:     "/",
+		})
+	} else {
+		http.SetCookie(w, &http.Cookie{
+			Name:    "Authorization",
+			Value:   tokenString,
+			Expires: time.Now().Add(time.Hour * 24),
+			Path:    "/",
+		})
+	}
+
 	user := repository.GetUser(username)
 	if user.Username == "" {
 		zap.L().Info("No user found", zap.String("Username", username))

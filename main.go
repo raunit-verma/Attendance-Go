@@ -30,6 +30,7 @@ func main() {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{os.Getenv("URL")},
 		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST"},
 	})
 
 	handler := c.Handler(r)
