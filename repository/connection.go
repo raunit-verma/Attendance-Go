@@ -18,20 +18,34 @@ var pgDb *pg.DB = nil
 
 // remove use of contansts and use utils ( bin )
 func GetDB() *pg.DB {
-	DbConfig := DbConfig{
-		User:     os.Getenv("DB_USER"),
-		Address:  os.Getenv("DB_ADDRESS"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Database: os.Getenv("DB_DATABASE"),
-	}
 	if pgDb == nil {
-		pgDb = ConnectToDB(DbConfig)
+		if os.Getenv("TYPE") == "Development" {
+			DbConfig := DbConfig{
+				User:     os.Getenv("DB_USER"),
+				Address:  os.Getenv("DB_ADDRESS"),
+				Password: os.Getenv("DB_PASSWORD"),
+				Database: os.Getenv("DB_DATABASE"),
+			}
+			pgDb = ConnectToDB(DbConfig)
+			zap.L().Info("Connection to Development Database.")
+		} else {
+			pgUrl, _ := pg.ParseURL(os.Getenv("DB_ADDRESS_PRODUCTION"))
+			DbConfig := DbConfig{
+				User:     os.Getenv("DB_USER_PRODUCTION"),
+				Address:  pgUrl.Addr,
+				Password: os.Getenv("DB_PASSWORD_PRODUCTION"),
+				Database: os.Getenv("DB_DATABASE_PRODUCTION"),
+			}
+			pgDb = ConnectToDB(DbConfig)
+			zap.L().Info("Connection to Production Database.")
+		}
 		_ = CreateSchema(pgDb)
 	}
 	return pgDb
 }
 
 func ConnectToDB(dbConfig DbConfig) *pg.DB {
+
 	opts := &pg.Options{
 		User:     dbConfig.User,
 		Password: dbConfig.Password,

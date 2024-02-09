@@ -114,6 +114,5 @@ func IsStrongPassword(password string) (bool, string) {
 			hasDigit = true
 		}
 	}
-
 	return hasUpperCase && hasLowerCase && hasDigit, " Password must have one uppercase, one lowercase & one digit."
 }
