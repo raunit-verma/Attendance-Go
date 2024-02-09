@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"go.uber.org/zap"
 )
@@ -16,11 +15,11 @@ func init() {
 }
 
 func main() {
-	err := godotenv.Load()
+	// err := godotenv.Load()
 
-	if err != nil {
-		zap.L().Fatal("Error loading Env", zap.Error(err))
-	}
+	// if err != nil {
+	// 	zap.L().Fatal("Error loading Env", zap.Error(err))
+	// }
 
 	serverConfig := router.ServerConfig{
 		Port: os.Getenv("PORT"),
