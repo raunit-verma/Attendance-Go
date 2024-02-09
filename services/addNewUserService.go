@@ -17,6 +17,13 @@ func AddNewUserService(newUser repository.User, username string, w http.Response
 		return
 	}
 
+	flag, message := util.IsStrongPassword(newUser.Password)
+
+	if !flag {
+		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.PasswordNotStrong_Ten + message, ErrorCode: 10})
+		return
+	}
+
 	user := repository.GetUser(username)
 	if user.Role != "principal" {
 		zap.L().Warn("Unauthorized to add new user")

@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -89,4 +90,30 @@ func GenerateHashFromPassword(password string) (string, error) {
 		return "", err
 	}
 	return string(hashedPassword), nil
+}
+
+// strong password checker
+func IsStrongPassword(password string) (bool, string) {
+	if len(password) < 8 {
+		return false, " Password must be of 8 characters."
+	}
+
+	var (
+		hasUpperCase bool
+		hasLowerCase bool
+		hasDigit     bool
+	)
+
+	for _, char := range password {
+		switch {
+		case unicode.IsUpper(char):
+			hasUpperCase = true
+		case unicode.IsLower(char):
+			hasLowerCase = true
+		case unicode.IsDigit(char):
+			hasDigit = true
+		}
+	}
+
+	return hasUpperCase && hasLowerCase && hasDigit, " Password must have one uppercase, one lowercase & one digit."
 }

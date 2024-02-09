@@ -15,5 +15,6 @@ const (
 	DBError_Seven                  = "Error in doing DB operation."                 // Seven
 	Success_Eight                  = "Operation completed."                         // Eight
 	OperationNotAllowed_Nine       = "Operation not allowed."                       // Nine
+	PasswordNotStrong_Ten          = "Password not strong."                         // Ten
 	InternalServererror        int = 500
 )
