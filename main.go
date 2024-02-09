@@ -40,7 +40,7 @@ func main() {
 
 	zap.L().Info(`Server starting on Port ` + serverConfig.Port)
 
-	if err := http.ListenAndServe(serverConfig.Port, handler); err != nil {
+	if err := http.ListenAndServe(":"+serverConfig.Port, handler); err != nil {
 		zap.L().Fatal("HTTP server failed to start at Port "+serverConfig.Port, zap.Error((err)))
 	}
 }
