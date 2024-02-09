@@ -26,9 +26,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			Name:     "Authorization",
 			Value:    tokenString,
 			Expires:  time.Now().Add(time.Hour * 24),
-			HttpOnly: true,
+			HttpOnly: false,
 			Secure:   true,
-			SameSite: http.SameSiteNoneMode,
+			SameSite: http.SameSiteStrictMode,
 			Domain:   os.Getenv("DOMAIN"),
 			Path:     "/",
 		})
