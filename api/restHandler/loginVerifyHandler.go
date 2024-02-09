@@ -27,6 +27,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(time.Hour * 24),
 		HttpOnly: true,
 		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 		Domain:   os.Getenv("DOMAIN"), // production
 		Path:     "/",
 	})
