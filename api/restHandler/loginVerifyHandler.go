@@ -6,7 +6,6 @@ import (
 	"attendance/util"
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -28,7 +27,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
-		Domain:   os.Getenv("DOMAIN"), // production
 		Path:     "/",
 	})
 	user := repository.GetUser(username)
