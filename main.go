@@ -19,7 +19,7 @@ func main() {
 	err := godotenv.Load()
 
 	if err != nil {
-		zap.L().Fatal("Error loading Env", zap.Error(err))
+		zap.L().Error("Error loading Env", zap.Error(err))
 	}
 
 	serverConfig := router.ServerConfig{
