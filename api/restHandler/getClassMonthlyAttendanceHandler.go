@@ -29,7 +29,7 @@ func ValidateClassRequestData(data repository.GetClassAttendanceJSON) (bool, str
 }
 
 func GetClassAttendanceHandler(w http.ResponseWriter, r *http.Request) {
-	status, username := auth.VerifyToken(r)
+	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		zap.L().Error("User not verified", zap.String("Code", "1"))
 		w.WriteHeader(status)

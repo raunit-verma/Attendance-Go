@@ -38,7 +38,7 @@ func AddNewUser(user *User) error {
 }
 
 func GetCurrentStatus(username string) (bool, []Attendance) {
-	t := util.GetCurrentIndianTime()
+	t := time.Now()
 	startDate, _ := util.FormateDateTime(t.Year(), t.Month(), t.Day(), 0, 0, 0)
 	endDate, _ := util.FormateDateTime(t.Year(), t.Month(), t.Day(), 23, 59, 59)
 
@@ -145,4 +145,59 @@ func GetStudentAttendance(username string, data GetStudentAttendanceJSON) []Atte
 	}
 
 	return results
+}
+
+func GetDailyStats(data GetHomeJSON) (int, int, int, int) {
+	db := GetDB()
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 23, 59, 59)
+	var totalTeacherPresent int
+	var totalStudentPresent int
+	var totalStudent int
+	var totalTeacher int
+	err := db.Model(&Attendance{}).
+		ColumnExpr("COUNT (DISTINCT attendances.username)").
+		Join("JOIN users ON users.username = attendances.username").
+		Table("attendances").
+		Where("attendances.punch_in_date BETWEEN ? AND ?", startDate, endDate).
+		Where("users.role=?", "teacher").
+		Select(&totalTeacherPresent)
+
+	if err != nil {
+		zap.L().Error("Error in counting distinct present username teacher", zap.Error(err))
+		return -1, -1, -1, -1
+	}
+
+	err = db.Model(&Attendance{}).
+		ColumnExpr("COUNT (DISTINCT attendances.username)").
+		Join("JOIN users ON users.username = attendances.username").
+		Table("attendances").
+		Where("attendances.punch_in_date BETWEEN ? AND ?", startDate, endDate).
+		Where("users.role=?", "student").
+		Select(&totalStudentPresent)
+
+	if err != nil {
+		zap.L().Error("Error in counting distinct present username student", zap.Error(err))
+		return -1, -1, -1, -1
+	}
+
+	err = db.Model(&User{}).
+		ColumnExpr("COUNT (DISTINCT username)").
+		Where("role=?", "student").Select(&totalStudent)
+
+	if err != nil {
+		zap.L().Error("Error in counting distinct username student", zap.Error(err))
+		return -1, -1, -1, -1
+	}
+
+	err = db.Model(&User{}).
+		ColumnExpr("COUNT (DISTINCT username)").
+		Where("role=?", "teacher").Select(&totalTeacher)
+
+	if err != nil {
+		zap.L().Error("Error in counting distinct username teacher", zap.Error(err))
+		return -1, -1, -1, -1
+	}
+
+	return totalStudentPresent, totalTeacherPresent, totalStudent, totalTeacher
 }

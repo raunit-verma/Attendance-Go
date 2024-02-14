@@ -60,6 +60,19 @@ type GetStudentAttendanceJSON struct {
 	Year  int `json:"year"`
 }
 
+type GetHomeJSON struct {
+	Date  int `json:"date"`
+	Month int `json:"month"`
+	Year  int `json:"year"`
+}
+
+type DashboardJSON struct {
+	MonthlyAttendance []bool `json:"monthly_attendance"`
+	Hour              int    `json:"hour"`
+	Minute            int    `json:"minute"`
+	Second            int    `json:"second"`
+}
+
 func (newUser User) IsNewUserDataMissing(w http.ResponseWriter, r *http.Request) bool {
 	IsDataMissing := false
 	Message := ""
@@ -117,8 +130,8 @@ func CreateSchema(db *pg.DB) error {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS "attendances" (
 		"username" VARCHAR(255),
 		"attendance_id" VARCHAR(255) PRIMARY KEY,
-		"punch_in_date" TIMESTAMP WITH TIME ZONE,
-		"punch_out_date" TIMESTAMP WITH TIME ZONE
+		"punch_in_date" TIMESTAMP,
+		"punch_out_date" TIMESTAMP
 	  );
 	  `)
 

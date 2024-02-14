@@ -76,16 +76,16 @@ func CreateToken(r *http.Request) (int, string, string) {
 	return http.StatusAccepted, tokenString, user.Username
 }
 
-func VerifyToken(r *http.Request) (int, string) {
+func VerifyToken(r *http.Request) (int, string, string) {
 	cookie, err := r.Cookie("Authorization")
 
 	if err != nil {
 		if err == http.ErrNoCookie {
 			zap.L().Error("No Cookie found", zap.Error(err))
-			return http.StatusUnauthorized, ""
+			return http.StatusUnauthorized, "", ""
 		}
 		zap.L().Error("Cannot retrieve cookie", zap.Error(err))
-		return http.StatusBadRequest, ""
+		return http.StatusBadRequest, "", ""
 	}
 
 	tokenStr := cookie.Value
@@ -98,15 +98,15 @@ func VerifyToken(r *http.Request) (int, string) {
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			zap.L().Error("Invalid token", zap.Error(err))
-			return http.StatusUnauthorized, ""
+			return http.StatusUnauthorized, "", ""
 		}
 		zap.L().Error("Error verifying token", zap.Error(err))
-		return http.StatusBadRequest, ""
+		return http.StatusBadRequest, "", ""
 	}
 
 	if !token.Valid {
 		zap.L().Error("Token not valid")
-		return http.StatusUnauthorized, ""
+		return http.StatusUnauthorized, "", ""
 	}
-	return http.StatusAccepted, claims.Username
+	return http.StatusAccepted, claims.Username, claims.Role
 }

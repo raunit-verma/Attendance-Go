@@ -48,20 +48,20 @@ func PrintStructFields(data interface{}) {
 }
 
 // Converts and return current time in India timezone
-func GetCurrentIndianTime() time.Time {
-	currentTimeUTC := time.Now().UTC()
-	indiaTimeZone, err := time.LoadLocation(TimeZone)
-	if err != nil {
-		zap.L().Error("Error loading indian timezone")
-		return time.Now()
-	}
-	return currentTimeUTC.In(indiaTimeZone)
-}
+// func GetCurrentIndianTime() time.Time {
+// 	currentTimeUTC := time.Now().UTC()
+// 	indiaTimeZone, err := time.LoadLocation(TimeZone)
+// 	if err != nil {
+// 		zap.L().Error("Error loading indian timezone")
+// 		return time.Now()
+// 	}
+// 	return currentTimeUTC.In(indiaTimeZone)
+// }
 
 // Formate Date Time to Required Format
 func FormateDateTime(year int, month time.Month, date int, hour int, min int, sec int) (string, time.Time) {
-	punchInDate := time.Date(year, month, date, hour, min, sec, 0, time.UTC)
-	indiaTimeZone, err := time.LoadLocation(TimeZone)
+	punchInDate := time.Date(year, month, date, hour, min, sec, 0, time.Local)
+	indiaTimeZone, err := time.LoadLocation(time.Local.String())
 	if err != nil {
 		zap.L().Error("Error loading time zone")
 		return "", time.Now()
@@ -116,3 +116,12 @@ func IsStrongPassword(password string) (bool, string) {
 	}
 	return hasUpperCase && hasLowerCase && hasDigit, " Password must have one uppercase, one lowercase & one digit."
 }
+
+// // calculate daily attendance
+// func CalculateDailyAttendance(attendances []repository.Attendance) {
+// 	var dailyAttandance [32]bool
+// 	for i := 0; i < len(attendances); i++ {
+
+// 	}
+// 	fmt.Println(dailyAttandance)
+// }

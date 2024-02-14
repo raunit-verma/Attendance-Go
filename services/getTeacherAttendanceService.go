@@ -23,5 +23,4 @@ func GetTeacherAttendanceService(username string, teacherId string, data reposit
 	allAttendances := repository.GetTeacherAttendance(teacherId, data)
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(allAttendances)
-
 }

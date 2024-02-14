@@ -16,6 +16,8 @@ func NewMUXRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	// all the routes are defined here
+	// home route to display all stats
+	r.HandleFunc("/home", restHandler.HomeHandler).Methods("POST")
 
 	// Route for accepting username and password
 	r.HandleFunc("/login", restHandler.LoginHandler).Methods("POST")

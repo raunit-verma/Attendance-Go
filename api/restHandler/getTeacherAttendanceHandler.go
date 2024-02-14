@@ -26,7 +26,7 @@ func ValidateTeacherRequestData(data repository.GetTeacherAttendanceJSON) (bool,
 }
 
 func GetTeacherAttendanceHandler(w http.ResponseWriter, r *http.Request) {
-	status, username := auth.VerifyToken(r)
+	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})

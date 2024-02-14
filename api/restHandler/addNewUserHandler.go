@@ -13,7 +13,7 @@ import (
 
 func AddNewUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	status, username := auth.VerifyToken(r)
+	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One})
