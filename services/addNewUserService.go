@@ -10,7 +10,19 @@ import (
 	"go.uber.org/zap"
 )
 
-func AddNewUserService(newUser repository.User, username string, w http.ResponseWriter, r *http.Request) {
+type AddNewUserService interface {
+	AddNewUser(newUser repository.User, username string, w http.ResponseWriter, r *http.Request)
+}
+
+type AddNewUserServiceImpl struct {
+	repository repository.Repository
+}
+
+func NewAddNewUserServiceImpl(repository repository.Repository) *AddNewUserServiceImpl {
+	return &AddNewUserServiceImpl{repository: repository}
+}
+
+func (impl *AddNewUserServiceImpl) AddNewUser(newUser repository.User, username string, w http.ResponseWriter, r *http.Request) {
 	util.TrimSpacesFromStruct(&newUser)
 	if newUser.IsNewUserDataMissing(w, r) {
 		zap.L().Error("New user data is missing")
@@ -24,7 +36,7 @@ func AddNewUserService(newUser repository.User, username string, w http.Response
 		return
 	}
 
-	user := repository.GetUser(username)
+	user := impl.repository.GetUser(username)
 	if user.Role != "principal" {
 		zap.L().Warn("Unauthorized to add new user")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -32,7 +44,7 @@ func AddNewUserService(newUser repository.User, username string, w http.Response
 		return
 	}
 
-	err := repository.AddNewUser(&newUser)
+	err := impl.repository.AddNewUser(&newUser)
 	pgErr, ok := err.(pg.Error)
 	if err != nil {
 		if ok && pgErr.Field('C') == "23505" {

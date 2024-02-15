@@ -8,6 +8,20 @@ import (
 	"time"
 )
 
+type HomeService interface {
+	TeacherDashboardService(w http.ResponseWriter, r *http.Request, username string, requestData repository.GetHomeJSON)
+	StudentDashboardService(w http.ResponseWriter, r *http.Request, username string, requestData repository.GetHomeJSON)
+	PrincipalDashboardService(w http.ResponseWriter, r *http.Request, requestData repository.GetHomeJSON)
+}
+
+type HomeServiceImpl struct {
+	repository repository.Repository
+}
+
+func NewHomeServiceImpl(repository repository.Repository) *HomeServiceImpl {
+	return &HomeServiceImpl{repository: repository}
+}
+
 func getMonthlyAttendance(allAttendance []repository.Attendance) ([32]bool, time.Duration) {
 	var monthlyAttendance [32]bool
 	var totalSeconds int64 = 0
@@ -21,24 +35,24 @@ func getMonthlyAttendance(allAttendance []repository.Attendance) ([32]bool, time
 	return monthlyAttendance, duration
 }
 
-func TeacherDashboardService(w http.ResponseWriter, r *http.Request, username string, requestData repository.GetHomeJSON) {
+func (impl *HomeServiceImpl) TeacherDashboardService(w http.ResponseWriter, r *http.Request, username string, requestData repository.GetHomeJSON) {
 	data := repository.GetTeacherAttendanceJSON{ID: username, Month: requestData.Month, Year: requestData.Year}
-	allAttendance := repository.GetTeacherAttendance(username, data)
+	allAttendance := impl.repository.GetTeacherAttendance(username, data)
 	monthlyAttendance, duration := getMonthlyAttendance(allAttendance)
 
 	json.NewEncoder(w).Encode(repository.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60})
 }
 
-func StudentDashboardService(w http.ResponseWriter, r *http.Request, username string, requestData repository.GetHomeJSON) {
+func (impl *HomeServiceImpl) StudentDashboardService(w http.ResponseWriter, r *http.Request, username string, requestData repository.GetHomeJSON) {
 	data := repository.GetStudentAttendanceJSON{Month: requestData.Month, Year: requestData.Year}
-	allAttendance := repository.GetStudentAttendance(username, data)
+	allAttendance := impl.repository.GetStudentAttendance(username, data)
 	monthlyAttendance, duration := getMonthlyAttendance(allAttendance)
 
 	json.NewEncoder(w).Encode(repository.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60})
 }
 
-func PrincipalDashboardService(w http.ResponseWriter, r *http.Request, requestData repository.GetHomeJSON) {
-	totalStudentPresent, totalTeacherPresent, totalStudent, totalTeacher := repository.GetDailyStats(requestData)
+func (impl *HomeServiceImpl) PrincipalDashboardService(w http.ResponseWriter, r *http.Request, requestData repository.GetHomeJSON) {
+	totalStudentPresent, totalTeacherPresent, totalStudent, totalTeacher := impl.repository.GetDailyStats(requestData)
 	if totalStudentPresent == -1 {
 		json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 7, Message: util.DBError_Seven})
 	}

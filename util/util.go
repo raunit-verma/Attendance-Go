@@ -12,6 +12,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Util interface {
+	IsValidEmail(email string)
+	TrimSpacesFromStruct(data interface{})
+	PrintStructFields(data interface{})
+	FormateDateTime(year int, month time.Month, date int, hour int, min int, sec int)
+	MatchPassword(hashedPassword []byte, password []byte)
+	GenerateHashFromPassword(password string)
+	IsStrongPassword(password string)
+}
+
 const TimeZone = "Asia/Kolkata"
 
 // checks if string is valid email or not

@@ -7,8 +7,20 @@ import (
 	"net/http"
 )
 
-func GetTeacherAttendanceService(username string, teacherId string, data repository.GetTeacherAttendanceJSON, w http.ResponseWriter, r *http.Request) {
-	user := repository.GetUser(username)
+type GetTeacherAttendanceService interface {
+	GetTeacherAttendance(username string, teacherId string, data repository.GetTeacherAttendanceJSON, w http.ResponseWriter, r *http.Request)
+}
+
+type GetTeacherAttendanceServiceImpl struct {
+	repository repository.Repository
+}
+
+func NewGetTeacherAttendanceServiceImpl(repository repository.Repository) *GetTeacherAttendanceServiceImpl {
+	return &GetTeacherAttendanceServiceImpl{repository: repository}
+}
+
+func (impl *GetClassAttendanceImpl) GetTeacherAttendance(username string, teacherId string, data repository.GetTeacherAttendanceJSON, w http.ResponseWriter, r *http.Request) {
+	user := impl.repository.GetUser(username)
 
 	if user.Role != "principal" && user.Role != "teacher" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -20,7 +32,7 @@ func GetTeacherAttendanceService(username string, teacherId string, data reposit
 		teacherId = user.Username
 	}
 
-	allAttendances := repository.GetTeacherAttendance(teacherId, data)
+	allAttendances := impl.repository.GetTeacherAttendance(teacherId, data)
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(allAttendances)
 }

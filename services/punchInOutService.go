@@ -9,8 +9,21 @@ import (
 	"go.uber.org/zap"
 )
 
-func PunchInService(username string, w http.ResponseWriter, r *http.Request) {
-	user := repository.GetUser(username)
+type PunchInOutService interface {
+	PunchInService(username string, w http.ResponseWriter, r *http.Request)
+	PunchOutService(username string, w http.ResponseWriter, r *http.Request)
+}
+
+type PunchInOutServiceImpl struct {
+	repository repository.Repository
+}
+
+func NewPunchInOutServiceImpl(repository repository.Repository) *PunchInOutServiceImpl {
+	return &PunchInOutServiceImpl{repository: repository}
+}
+
+func (impl *PunchInOutServiceImpl) PunchInService(username string, w http.ResponseWriter, r *http.Request) {
+	user := impl.repository.GetUser(username)
 	if user == nil {
 		zap.L().Error("User not authorized.", zap.String("Username", username))
 		w.WriteHeader(http.StatusUnauthorized)
@@ -18,14 +31,14 @@ func PunchInService(username string, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentStatus, _ := repository.GetCurrentStatus(user.Username)
+	currentStatus, _ := impl.repository.GetCurrentStatus(user.Username)
 
 	if currentStatus {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 9, Message: util.OperationNotAllowed_Nine + " Punch out first before punching in again."})
 		return
 	}
-	err := repository.AddNewPunchIn(user.Username)
+	err := impl.repository.AddNewPunchIn(user.Username)
 	if err != nil {
 		zap.L().Error("Error doing operation on DB.", zap.Error(err))
 		w.WriteHeader(util.InternalServererror)
@@ -37,8 +50,8 @@ func PunchInService(username string, w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func PunchOutService(username string, w http.ResponseWriter, r *http.Request) {
-	user := repository.GetUser(username)
+func (impl *PunchInOutServiceImpl) PunchOutService(username string, w http.ResponseWriter, r *http.Request) {
+	user := impl.repository.GetUser(username)
 	if user == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		zap.L().Error("User not authorized.", zap.String("Username", username))
@@ -46,14 +59,14 @@ func PunchOutService(username string, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentStatus, punchIn := repository.GetCurrentStatus(user.Username)
+	currentStatus, punchIn := impl.repository.GetCurrentStatus(user.Username)
 
 	if !currentStatus {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 9, Message: util.OperationNotAllowed_Nine + " Punch in first before punching out."})
 		return
 	}
-	err := repository.AddNewPunchOut(user.Username, punchIn[0])
+	err := impl.repository.AddNewPunchOut(user.Username, punchIn[0])
 	if err != nil {
 		w.WriteHeader(util.InternalServererror)
 		zap.L().Error("Error doing operation on DB.", zap.Error(err))

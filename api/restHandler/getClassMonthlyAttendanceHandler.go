@@ -11,6 +11,18 @@ import (
 	"go.uber.org/zap"
 )
 
+type GetClassAttendanceHandler interface {
+	GetClassAttendance(w http.ResponseWriter, r *http.Request)
+}
+
+type GetClassAttendanceImpl struct {
+	getClassAttendance services.GetClassAttendanceService
+}
+
+func NewGetClassAttendanceImpl(getClassAttendance services.GetClassAttendanceService) *GetClassAttendanceImpl {
+	return &GetClassAttendanceImpl{getClassAttendance: getClassAttendance}
+}
+
 func ValidateClassRequestData(data repository.GetClassAttendanceJSON) (bool, string) {
 	if data.Class <= 0 || data.Class > 12 {
 		zap.L().Info("Requested class is not valid")
@@ -28,7 +40,7 @@ func ValidateClassRequestData(data repository.GetClassAttendanceJSON) (bool, str
 	return false, ""
 }
 
-func GetClassAttendanceHandler(w http.ResponseWriter, r *http.Request) {
+func (impl *GetClassAttendanceImpl) GetClassAttendance(w http.ResponseWriter, r *http.Request) {
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		zap.L().Error("User not verified", zap.String("Code", "1"))
@@ -53,6 +65,6 @@ func GetClassAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	services.GetClassAttendanceService(username, newStudentAttendanceRequest, w, r)
+	impl.getClassAttendance.GetClassAttendance(username, newStudentAttendanceRequest, w, r)
 	return
 }

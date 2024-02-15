@@ -11,7 +11,19 @@ import (
 	"go.uber.org/zap"
 )
 
-func AddNewUserHandler(w http.ResponseWriter, r *http.Request) {
+type AddNewUserHandler interface {
+	AddNewUser(w http.ResponseWriter, r *http.Request)
+}
+
+type AddNewUserImpl struct {
+	addNewUserService services.AddNewUserService
+}
+
+func NewAddNewUserImpl(addNewUserService services.AddNewUserService) *AddNewUserImpl {
+	return &AddNewUserImpl{addNewUserService: addNewUserService}
+}
+
+func (impl *AddNewUserImpl) AddNewUser(w http.ResponseWriter, r *http.Request) {
 
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
@@ -30,7 +42,7 @@ func AddNewUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	services.AddNewUserService(newUser, username, w, r)
+	impl.addNewUserService.AddNewUser(newUser, username, w, r)
 
 	return
 }

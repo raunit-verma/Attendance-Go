@@ -11,6 +11,18 @@ import (
 	"go.uber.org/zap"
 )
 
+type HomeHandler interface {
+	Home(w http.ResponseWriter, r *http.Request)
+}
+
+type HomeImpl struct {
+	homeService services.HomeService
+}
+
+func NewHomeImpl(homeService services.HomeService) *HomeImpl {
+	return &HomeImpl{homeService: homeService}
+}
+
 func ValidateRequestData(data repository.GetHomeJSON) (bool, string) {
 	if data.Month <= 0 || data.Month > 12 {
 		zap.L().Info("Requested month is not valid")
@@ -22,7 +34,7 @@ func ValidateRequestData(data repository.GetHomeJSON) (bool, string) {
 	return false, ""
 }
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
+func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
 	status, username, role := auth.VerifyToken(r)
 
 	if status != http.StatusAccepted {
@@ -50,10 +62,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if role == "student" {
-		services.StudentDashboardService(w, r, username, newHomeRequest)
+		impl.homeService.StudentDashboardService(w, r, username, newHomeRequest)
 	} else if role == "teacher" {
-		services.TeacherDashboardService(w, r, username, newHomeRequest)
+		impl.homeService.TeacherDashboardService(w, r, username, newHomeRequest)
 	} else if role == "principal" {
-		services.PrincipalDashboardService(w, r, newHomeRequest)
+		impl.homeService.PrincipalDashboardService(w, r, newHomeRequest)
 	}
 }

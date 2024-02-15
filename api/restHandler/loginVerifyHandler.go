@@ -12,7 +12,19 @@ import (
 	"go.uber.org/zap"
 )
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+type LoginHandler interface {
+	GetTeacherAttendance(w http.ResponseWriter, r *http.Request)
+}
+
+type LoginImpl struct {
+	repository repository.Repository
+}
+
+func NewLoginImpl(repository repository.Repository) *LoginImpl {
+	return &LoginImpl{repository: repository}
+}
+
+func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {
 	status, tokenString, username := auth.CreateToken(r)
 
 	if status != http.StatusAccepted {
@@ -41,7 +53,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	user := repository.GetUser(username)
+	user := impl.repository.GetUser(username)
 	if user.Username == "" {
 		zap.L().Info("No user found", zap.String("Username", username))
 		w.WriteHeader(http.StatusBadGateway)
@@ -53,14 +65,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	zap.L().Info("User logged in", zap.String("username", user.Username))
 }
 
-func VerifyToken(w http.ResponseWriter, r *http.Request) {
+func (impl *LoginImpl) VerifyToken(w http.ResponseWriter, r *http.Request) {
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
-	user := repository.GetUser(username)
+	user := impl.repository.GetUser(username)
 	user.Password = ""
 	json.NewEncoder(w).Encode(user)
 }

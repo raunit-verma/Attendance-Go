@@ -11,6 +11,18 @@ import (
 	"go.uber.org/zap"
 )
 
+type GetStudentAttendanceHandler interface {
+	GetStudentAttendance(w http.ResponseWriter, r *http.Request)
+}
+
+type GetStudentAttendanceImpl struct {
+	getStudentAttendance services.GetStudentAttendanceService
+}
+
+func NewGetStudentAttendanceImpl(getStudentAttendance services.GetStudentAttendanceService) *GetStudentAttendanceImpl {
+	return &GetStudentAttendanceImpl{getStudentAttendance: getStudentAttendance}
+}
+
 func ValidateStudentRequestData(data repository.GetStudentAttendanceJSON) (bool, string) {
 	if data.Month <= 0 || data.Month > 12 {
 		zap.L().Info("Requested month is not valid")
@@ -22,7 +34,7 @@ func ValidateStudentRequestData(data repository.GetStudentAttendanceJSON) (bool,
 	return false, ""
 }
 
-func GetStudentAttendanceHandler(w http.ResponseWriter, r *http.Request) {
+func (impl *GetStudentAttendanceImpl) GetStudentAttendance(w http.ResponseWriter, r *http.Request) {
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
@@ -46,6 +58,6 @@ func GetStudentAttendanceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	services.GetStudentAttendanceService(username, newStudentAttendanceRequest, w, r)
+	impl.getStudentAttendance.GetStudentAttendance(username, newStudentAttendanceRequest, w, r)
 	return
 }

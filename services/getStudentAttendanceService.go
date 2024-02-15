@@ -9,8 +9,20 @@ import (
 	"go.uber.org/zap"
 )
 
-func GetStudentAttendanceService(username string, data repository.GetStudentAttendanceJSON, w http.ResponseWriter, r *http.Request) {
-	user := repository.GetUser(username)
+type GetStudentAttendanceService interface {
+	GetStudentAttendance(username string, data repository.GetStudentAttendanceJSON, w http.ResponseWriter, r *http.Request)
+}
+
+type GetStudentAttendanceServiceImpl struct {
+	repository repository.Repository
+}
+
+func NewGetStudentAttendanceServiceImpl(repository repository.Repository) *GetStudentAttendanceServiceImpl {
+	return &GetStudentAttendanceServiceImpl{repository: repository}
+}
+
+func (impl *GetClassAttendanceImpl) GetStudentAttendance(username string, data repository.GetStudentAttendanceJSON, w http.ResponseWriter, r *http.Request) {
+	user := impl.repository.GetUser(username)
 
 	if user == nil && user.Role != "student" {
 		zap.L().Info("Not authorized to get student attendance details")
@@ -18,7 +30,7 @@ func GetStudentAttendanceService(username string, data repository.GetStudentAtte
 		json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One})
 		return
 	}
-	allAttendances := repository.GetStudentAttendance(username, data)
+	allAttendances := impl.repository.GetStudentAttendance(username, data)
 	json.NewEncoder(w).Encode(allAttendances)
 	return
 }
