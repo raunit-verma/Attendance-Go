@@ -2,22 +2,37 @@ package router
 
 import (
 	"attendance/api/restHandler"
+	"net/http"
 
 	"github.com/gorilla/mux"
 )
+
+type GetTeacherAttendanceHandler interface {
+	GetTeacherAttendance(w http.ResponseWriter, r *http.Request)
+}
+
+type MUXRouterImpl struct {
+	homeHandler  restHandler.HomeHandler
+	loginHandler restHandler.LoginHandler
+	// verifyToken auth.
+}
+
+func NewMUXRouterImpl(homeHandler restHandler.HomeHandler) *MUXRouterImpl {
+	return &MUXRouterImpl{homeHandler: homeHandler}
+}
 
 type ServerConfig struct {
 	Port string
 }
 
-func NewMUXRouter() *mux.Router {
+func (impl *MUXRouterImpl) NewMUXRouter() *mux.Router {
 	// creating a new mux router
 
 	r := mux.NewRouter()
 
 	// all the routes are defined here
 	// home route to display all stats
-	r.HandleFunc("/home", restHandler.HomeHandler).Methods("POST")
+	r.HandleFunc("/home", impl.homeHandler.Home).Methods("POST")
 
 	// Route for accepting username and password
 	r.HandleFunc("/login", restHandler.LoginHandler).Methods("POST")

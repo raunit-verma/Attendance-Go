@@ -11,6 +11,18 @@ import (
 	"go.uber.org/zap"
 )
 
+type AuthToken interface {
+	CreateToken(r *http.Request) (int, string, string)
+}
+
+type AuthTokenImpl struct {
+	repository repository.Repository
+}
+
+func NewAuthTokenImpl(repository repository.Repository) *AuthTokenImpl {
+	return &AuthTokenImpl{repository: repository}
+}
+
 var jwtKey = []byte("Raunit-Verma")
 
 var users = map[string]string{
@@ -32,7 +44,7 @@ type Credentials struct {
 	Password string `json:"password,omitempty"`
 }
 
-func CreateToken(r *http.Request) (int, string, string) {
+func (impl *AuthTokenImpl) CreateToken(r *http.Request) (int, string, string) {
 
 	var credentials Credentials
 
@@ -44,7 +56,7 @@ func CreateToken(r *http.Request) (int, string, string) {
 		return http.StatusBadRequest, "", ""
 	}
 
-	user := repository.GetUser(credentials.Username)
+	user := impl.repository.GetUser(credentials.Username)
 
 	if user.Username != credentials.Username || user.Username == "" || user.Password == "" || !util.MatchPassword([]byte(user.Password), []byte(credentials.Password)) {
 		zap.L().Info("Wrong username or password", zap.String("Passed Credentials", user.Username))

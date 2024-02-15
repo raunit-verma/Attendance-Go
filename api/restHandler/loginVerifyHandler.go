@@ -18,6 +18,7 @@ type LoginHandler interface {
 
 type LoginImpl struct {
 	repository repository.Repository
+	authToken  auth.AuthToken
 }
 
 func NewLoginImpl(repository repository.Repository) *LoginImpl {
@@ -25,7 +26,7 @@ func NewLoginImpl(repository repository.Repository) *LoginImpl {
 }
 
 func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {
-	status, tokenString, username := auth.CreateToken(r)
+	status, tokenString, username := impl.authToken.CreateToken(r)
 
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
