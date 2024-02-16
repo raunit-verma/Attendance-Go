@@ -25,8 +25,12 @@ func main() {
 	serverConfig := router.ServerConfig{
 		Port: os.Getenv("PORT"),
 	}
+	db := repository.GetDB()
+	defer db.Close()
 
-	r := router.NewMUXRouter()
+	wire := InitializeApp(db)
+
+	r := wire.NewMUXRouter()
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{os.Getenv("URL")},
 		AllowCredentials: true,
@@ -35,8 +39,6 @@ func main() {
 
 	handler := c.Handler(r)
 
-	db := repository.GetDB()
-	defer db.Close()
 	defer zap.L().Sync()
 
 	zap.L().Info(`Server starting on Port ` + serverConfig.Port)

@@ -19,7 +19,7 @@ func NewGetTeacherAttendanceServiceImpl(repository repository.Repository) *GetTe
 	return &GetTeacherAttendanceServiceImpl{repository: repository}
 }
 
-func (impl *GetClassAttendanceImpl) GetTeacherAttendance(username string, teacherId string, data repository.GetTeacherAttendanceJSON, w http.ResponseWriter, r *http.Request) {
+func (impl *GetTeacherAttendanceServiceImpl) GetTeacherAttendance(username string, teacherId string, data repository.GetTeacherAttendanceJSON, w http.ResponseWriter, r *http.Request) {
 	user := impl.repository.GetUser(username)
 
 	if user.Role != "principal" && user.Role != "teacher" {

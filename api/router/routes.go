@@ -2,22 +2,33 @@ package router
 
 import (
 	"attendance/api/restHandler"
-	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-type GetTeacherAttendanceHandler interface {
-	GetTeacherAttendance(w http.ResponseWriter, r *http.Request)
+type MuxRouter interface {
+	NewMUXRouter() *mux.Router
 }
 
 type MUXRouterImpl struct {
-	homeHandler  restHandler.HomeHandler
-	loginHandler restHandler.LoginHandler
-	// verifyToken auth.
+	homeHandler                 restHandler.HomeHandler
+	loginHandler                restHandler.LoginHandler
+	addNewUserHandler           restHandler.AddNewUserHandler
+	punchInOutHandler           restHandler.PunchInOutHandler
+	getTeacherAttendanceHandler restHandler.GetTeacherAttendanceHandler
+	getClassAttendanceHandler   restHandler.GetClassAttendanceHandler
+	getStudentAttandance        restHandler.GetStudentAttendanceHandler
+	fetchStatusHandler          restHandler.FetchStatusHandler
 }
 
-func NewMUXRouterImpl(homeHandler restHandler.HomeHandler) *MUXRouterImpl {
+func NewMUXRouterImpl(homeHandler restHandler.HomeHandler,
+	loginHandler restHandler.LoginHandler,
+	addNewUserHandler restHandler.AddNewUserHandler,
+	punchInOutHandler restHandler.PunchInOutHandler,
+	getTeacherAttendanceHandler restHandler.GetTeacherAttendanceHandler,
+	getClassAttendanceHandler restHandler.GetClassAttendanceHandler,
+	getStudentAttandance restHandler.GetStudentAttendanceHandler,
+	fetchStatusHandler restHandler.FetchStatusHandler) *MUXRouterImpl {
 	return &MUXRouterImpl{homeHandler: homeHandler}
 }
 
@@ -35,28 +46,28 @@ func (impl *MUXRouterImpl) NewMUXRouter() *mux.Router {
 	r.HandleFunc("/home", impl.homeHandler.Home).Methods("POST")
 
 	// Route for accepting username and password
-	r.HandleFunc("/login", restHandler.LoginHandler).Methods("POST")
+	r.HandleFunc("/login", impl.loginHandler.Login).Methods("POST")
 
 	// Route to verify token
-	r.HandleFunc("/verify", restHandler.VerifyToken).Methods("GET")
+	r.HandleFunc("/verify", impl.loginHandler.VerifyToken).Methods("GET")
 
 	// Route for adding new users
-	r.HandleFunc("/addnewuser", restHandler.AddNewUserHandler).Methods("POST")
+	r.HandleFunc("/addnewuser", impl.addNewUserHandler.AddNewUser).Methods("POST")
 
 	// Route for Punch-in and Punch-out
-	r.HandleFunc("/punchin", restHandler.PunchInHandler).Methods("GET")
-	r.HandleFunc("/punchout", restHandler.PunchOutHandler).Methods("GET")
+	r.HandleFunc("/punchin", impl.punchInOutHandler.PunchInHandler).Methods("GET")
+	r.HandleFunc("/punchout", impl.punchInOutHandler.PunchOutHandler).Methods("GET")
 
 	// Route for Teacher attendence for particular month accessible by Principal and Teacher
-	r.HandleFunc("/getteacherattendance", restHandler.GetTeacherAttendanceHandler).Methods("POST")
+	r.HandleFunc("/getteacherattendance", impl.getTeacherAttendanceHandler.GetTeacherAttendance).Methods("POST")
 
 	// Route to get class attendance for day, month and year
-	r.HandleFunc("/getclassattendance", restHandler.GetClassAttendanceHandler).Methods("POST")
+	r.HandleFunc("/getclassattendance", impl.getClassAttendanceHandler.GetClassAttendance).Methods("POST")
 
 	// Route to get particular student attendance for month and year
-	r.HandleFunc("/getstudentattendance", restHandler.GetStudentAttendanceHandler).Methods("POST")
+	r.HandleFunc("/getstudentattendance", impl.getStudentAttandance.GetStudentAttendance).Methods("POST")
 
 	// Route to get currentStatus of any user
-	r.HandleFunc("/fetchstatus", restHandler.FetchStatus).Methods("Get")
+	r.HandleFunc("/fetchstatus", impl.fetchStatusHandler.FetchStatus).Methods("Get")
 	return r
 }

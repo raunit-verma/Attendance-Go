@@ -13,7 +13,8 @@ import (
 )
 
 type LoginHandler interface {
-	GetTeacherAttendance(w http.ResponseWriter, r *http.Request)
+	Login(w http.ResponseWriter, r *http.Request)
+	VerifyToken(w http.ResponseWriter, r *http.Request)
 }
 
 type LoginImpl struct {

@@ -25,11 +25,6 @@ func NewAuthTokenImpl(repository repository.Repository) *AuthTokenImpl {
 
 var jwtKey = []byte("Raunit-Verma")
 
-var users = map[string]string{
-	"user1": "password1",
-	"user2": "password2",
-}
-
 type Claims struct {
 	Username string `json:"username"`
 	FullName string `json:"fullname"`

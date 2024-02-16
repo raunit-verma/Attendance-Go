@@ -21,7 +21,7 @@ func NewGetStudentAttendanceServiceImpl(repository repository.Repository) *GetSt
 	return &GetStudentAttendanceServiceImpl{repository: repository}
 }
 
-func (impl *GetClassAttendanceImpl) GetStudentAttendance(username string, data repository.GetStudentAttendanceJSON, w http.ResponseWriter, r *http.Request) {
+func (impl *GetStudentAttendanceServiceImpl) GetStudentAttendance(username string, data repository.GetStudentAttendanceJSON, w http.ResponseWriter, r *http.Request) {
 	user := impl.repository.GetUser(username)
 
 	if user == nil && user.Role != "student" {
@@ -32,5 +32,4 @@ func (impl *GetClassAttendanceImpl) GetStudentAttendance(username string, data r
 	}
 	allAttendances := impl.repository.GetStudentAttendance(username, data)
 	json.NewEncoder(w).Encode(allAttendances)
-	return
 }
