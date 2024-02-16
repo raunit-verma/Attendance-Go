@@ -21,7 +21,8 @@ type MUXRouterImpl struct {
 	fetchStatusHandler          restHandler.FetchStatusHandler
 }
 
-func NewMUXRouterImpl(homeHandler restHandler.HomeHandler,
+func NewMUXRouterImpl(
+	homeHandler restHandler.HomeHandler,
 	loginHandler restHandler.LoginHandler,
 	addNewUserHandler restHandler.AddNewUserHandler,
 	punchInOutHandler restHandler.PunchInOutHandler,
@@ -29,7 +30,15 @@ func NewMUXRouterImpl(homeHandler restHandler.HomeHandler,
 	getClassAttendanceHandler restHandler.GetClassAttendanceHandler,
 	getStudentAttandance restHandler.GetStudentAttendanceHandler,
 	fetchStatusHandler restHandler.FetchStatusHandler) *MUXRouterImpl {
-	return &MUXRouterImpl{homeHandler: homeHandler}
+	return &MUXRouterImpl{
+		homeHandler:                 homeHandler,
+		loginHandler:                loginHandler,
+		addNewUserHandler:           addNewUserHandler,
+		punchInOutHandler:           punchInOutHandler,
+		getTeacherAttendanceHandler: getTeacherAttendanceHandler,
+		getClassAttendanceHandler:   getClassAttendanceHandler,
+		getStudentAttandance:        getStudentAttandance,
+		fetchStatusHandler:          fetchStatusHandler}
 }
 
 type ServerConfig struct {

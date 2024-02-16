@@ -22,8 +22,8 @@ type LoginImpl struct {
 	authToken  auth.AuthToken
 }
 
-func NewLoginImpl(repository repository.Repository) *LoginImpl {
-	return &LoginImpl{repository: repository}
+func NewLoginImpl(repository repository.Repository, authToken auth.AuthToken) *LoginImpl {
+	return &LoginImpl{repository: repository, authToken: authToken}
 }
 
 func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {

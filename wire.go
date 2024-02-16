@@ -4,6 +4,7 @@
 package main
 
 import (
+	"attendance/api/auth"
 	rh "attendance/api/restHandler"
 	"attendance/api/router"
 	repo "attendance/repository"
@@ -15,6 +16,7 @@ import (
 
 func InitializeApp(*pg.DB) *router.MUXRouterImpl {
 	wire.Build(
+		auth.NewAuthTokenImpl, wire.Bind(new(auth.AuthToken), new(*auth.AuthTokenImpl)),
 		rh.NewAddNewUserImpl, wire.Bind(new(rh.AddNewUserHandler), new(*rh.AddNewUserImpl)),
 		rh.NewFetchStatusImpl, wire.Bind(new(rh.FetchStatusHandler), new(*rh.FetchStatusImpl)),
 		rh.NewGetClassAttendanceImpl, wire.Bind(new(rh.GetClassAttendanceHandler), new(*rh.GetClassAttendanceImpl)),

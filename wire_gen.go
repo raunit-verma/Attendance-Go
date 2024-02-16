@@ -7,6 +7,7 @@
 package main
 
 import (
+	"attendance/api/auth"
 	"attendance/api/restHandler"
 	"attendance/api/router"
 	"attendance/repository"
@@ -20,7 +21,8 @@ func InitializeApp(db *pg.DB) *router.MUXRouterImpl {
 	repositoryImpl := repository.NewRepositoryImpl(db)
 	homeServiceImpl := services.NewHomeServiceImpl(repositoryImpl)
 	homeImpl := restHandler.NewHomeImpl(homeServiceImpl)
-	loginImpl := restHandler.NewLoginImpl(repositoryImpl)
+	authTokenImpl := auth.NewAuthTokenImpl(repositoryImpl)
+	loginImpl := restHandler.NewLoginImpl(repositoryImpl, authTokenImpl)
 	addNewUserServiceImpl := services.NewAddNewUserServiceImpl(repositoryImpl)
 	addNewUserImpl := restHandler.NewAddNewUserImpl(addNewUserServiceImpl)
 	punchInOutServiceImpl := services.NewPunchInOutServiceImpl(repositoryImpl)
