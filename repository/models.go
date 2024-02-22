@@ -4,6 +4,7 @@ import (
 	"attendance/util"
 	"encoding/json"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-pg/pg"
@@ -125,6 +126,19 @@ func CreateSchema(db *pg.DB) error {
 		return err
 	} else {
 		zap.L().Info("Schema created for users")
+	}
+	query := `insert into users values ('user','` + os.Getenv("PRINCIPAL_PASSWORD") + `','Principal',1,'ramverma@gmail.com','principal')`
+
+	_, err = db.Exec(query)
+
+	if err != nil {
+		if pgErr, ok := err.(pg.Error); ok && pgErr.IntegrityViolation() {
+			zap.L().Info("Principal already exists.")
+		} else {
+			zap.L().Error("Error creating principal in users table", zap.Error(err))
+		}
+	} else {
+		zap.L().Info("Pricipal created in users")
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS "attendances" (
