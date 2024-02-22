@@ -5,6 +5,7 @@ import (
 	"attendance/util"
 	"encoding/json"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -23,7 +24,7 @@ func NewAuthTokenImpl(repository repository.Repository) *AuthTokenImpl {
 	return &AuthTokenImpl{repository: repository}
 }
 
-var jwtKey = []byte("Raunit-Verma")
+var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 type Claims struct {
 	Username string `json:"username"`
