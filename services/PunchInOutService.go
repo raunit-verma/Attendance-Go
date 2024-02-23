@@ -38,7 +38,10 @@ func (impl *PunchInOutServiceImpl) PunchIn(username string) (int, repository.Err
 	if currentStatus {
 		return http.StatusBadRequest, repository.ErrorJSON{ErrorCode: 9, Message: util.OperationNotAllowed_Nine + " Punch out first before punching in again."}
 	}
-	err := impl.repository.AddNewPunchIn(user.Username)
+
+	_, currentTime := util.FormateDateTime(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+
+	err := impl.repository.AddNewPunchIn(user.Username, currentTime)
 	if err != nil {
 		zap.L().Error("Error doing operation on DB.", zap.Error(err))
 		return http.StatusInternalServerError, repository.ErrorJSON{Message: util.DBError_Seven, ErrorCode: 7}
@@ -63,7 +66,10 @@ func (impl *PunchInOutServiceImpl) PunchOut(username string) (int, repository.Er
 	if !currentStatus {
 		return http.StatusBadRequest, repository.ErrorJSON{ErrorCode: 9, Message: util.OperationNotAllowed_Nine + " Punch in first before punching out."}
 	}
-	err := impl.repository.AddNewPunchOut(user.Username, punchIn[0])
+
+	_, currentTime := util.FormateDateTime(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+
+	err := impl.repository.AddNewPunchOut(user.Username, punchIn[0], currentTime)
 
 	if err != nil {
 		zap.L().Error("Error doing operation on DB.", zap.Error(err))

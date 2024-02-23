@@ -14,11 +14,11 @@ type Repository interface {
 	GetUser(username string) *User
 	AddNewUser(user *User) error
 	GetCurrentStatus(username string, startDate string, endDate string) (bool, []Attendance)
-	AddNewPunchIn(username string) error
-	AddNewPunchOut(username string, attendance Attendance) error
-	GetTeacherAttendance(username string, data GetTeacherAttendanceJSON) []Attendance
-	GetClassAttendance(data GetClassAttendanceJSON) []StudentAttendanceJSON
-	GetStudentAttendance(username string, data GetStudentAttendanceJSON) []Attendance
+	AddNewPunchIn(username string, currentTime time.Time) error
+	AddNewPunchOut(username string, attendance Attendance, currentTime time.Time) error
+	GetTeacherAttendance(username string, data GetTeacherAttendanceJSON, startDate string, endDate string) []Attendance
+	GetClassAttendance(data GetClassAttendanceJSON, startDate string, endDate string) []StudentAttendanceJSON
+	GetStudentAttendance(username string, data GetStudentAttendanceJSON, startDate string, endDate string) []Attendance
 	GetDailyStats(data GetHomeJSON) (int, int, int, int)
 }
 
@@ -72,9 +72,8 @@ func (impl *RepositoryImpl) GetCurrentStatus(username string, startDate string, 
 	return true, attendances
 }
 
-func (impl *RepositoryImpl) AddNewPunchIn(username string) error {
-	t := time.Now()
-	_, currentTime := util.FormateDateTime(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+func (impl *RepositoryImpl) AddNewPunchIn(username string, currentTime time.Time) error {
+
 	attendance := Attendance{
 		AttendanceID: uuid.New().String(),
 		PunchInDate:  currentTime,
@@ -88,9 +87,8 @@ func (impl *RepositoryImpl) AddNewPunchIn(username string) error {
 	return nil
 }
 
-func (impl *RepositoryImpl) AddNewPunchOut(username string, attendance Attendance) error {
-	t := time.Now()
-	_, currentTime := util.FormateDateTime(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+func (impl *RepositoryImpl) AddNewPunchOut(username string, attendance Attendance, currentTime time.Time) error {
+
 	attendance.PunchOutDate = currentTime
 	_, err := impl.db.Model(&attendance).Where("attendance_id = ?", attendance.AttendanceID).Column("punch_out_date").Update()
 	if err != nil {
@@ -100,11 +98,8 @@ func (impl *RepositoryImpl) AddNewPunchOut(username string, attendance Attendanc
 	return nil
 }
 
-func (impl *RepositoryImpl) GetTeacherAttendance(username string, data GetTeacherAttendanceJSON) []Attendance {
+func (impl *RepositoryImpl) GetTeacherAttendance(username string, data GetTeacherAttendanceJSON, startDate string, endDate string) []Attendance {
 	var attendances []Attendance
-
-	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
-	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
 	err := impl.db.Model(&attendances).Where("username=?", username).Where("punch_in_date BETWEEN ? AND ?", startDate, endDate).Select()
 
@@ -116,11 +111,8 @@ func (impl *RepositoryImpl) GetTeacherAttendance(username string, data GetTeache
 	return attendances
 }
 
-func (impl *RepositoryImpl) GetClassAttendance(data GetClassAttendanceJSON) []StudentAttendanceJSON {
+func (impl *RepositoryImpl) GetClassAttendance(data GetClassAttendanceJSON, startDate string, endDate string) []StudentAttendanceJSON {
 	var results []StudentAttendanceJSON
-
-	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 0, 0, 0)
-	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 23, 59, 59)
 
 	err := impl.db.Model(&results).
 		ColumnExpr("DISTINCT users.username").
@@ -140,10 +132,8 @@ func (impl *RepositoryImpl) GetClassAttendance(data GetClassAttendanceJSON) []St
 	return results
 }
 
-func (impl *RepositoryImpl) GetStudentAttendance(username string, data GetStudentAttendanceJSON) []Attendance {
+func (impl *RepositoryImpl) GetStudentAttendance(username string, data GetStudentAttendanceJSON, startDate string, endDate string) []Attendance {
 	var results []Attendance
-	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
-	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
 	err := impl.db.Model(&results).Where("username=?", username).Where("punch_in_date BETWEEN ? AND ?", startDate, endDate).Select()
 

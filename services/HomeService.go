@@ -35,14 +35,22 @@ func getMonthlyAttendance(allAttendance []repository.Attendance) ([32]bool, time
 
 func (impl *HomeServiceImpl) TeacherDashboardService(username string, requestData repository.GetHomeJSON) repository.DashboardJSON {
 	data := repository.GetTeacherAttendanceJSON{ID: username, Month: requestData.Month, Year: requestData.Year}
-	allAttendance := impl.repository.GetTeacherAttendance(username, data)
+
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
+
+	allAttendance := impl.repository.GetTeacherAttendance(username, data, startDate, endDate)
 	monthlyAttendance, duration := getMonthlyAttendance(allAttendance)
 	return repository.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
 }
 
 func (impl *HomeServiceImpl) StudentDashboardService(username string, requestData repository.GetHomeJSON) repository.DashboardJSON {
 	data := repository.GetStudentAttendanceJSON{Month: requestData.Month, Year: requestData.Year}
-	allAttendance := impl.repository.GetStudentAttendance(username, data)
+
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
+
+	allAttendance := impl.repository.GetStudentAttendance(username, data, startDate, endDate)
 	monthlyAttendance, duration := getMonthlyAttendance(allAttendance)
 	return repository.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
 }

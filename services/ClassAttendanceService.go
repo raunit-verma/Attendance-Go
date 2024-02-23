@@ -4,6 +4,7 @@ import (
 	"attendance/repository"
 	"attendance/util"
 	"net/http"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -27,6 +28,10 @@ func (impl *ClassAttendanceImpl) GetClassAttendance(username string, data reposi
 		zap.L().Info("Not authorized to get student attendance details")
 		return http.StatusUnauthorized, repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1}, nil
 	}
-	allStudentList := impl.repository.GetClassAttendance(data)
+
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 23, 59, 59)
+
+	allStudentList := impl.repository.GetClassAttendance(data, startDate, endDate)
 	return http.StatusAccepted, repository.ErrorJSON{}, allStudentList
 }

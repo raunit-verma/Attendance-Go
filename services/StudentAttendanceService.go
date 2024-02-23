@@ -2,6 +2,8 @@ package services
 
 import (
 	"attendance/repository"
+	"attendance/util"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -26,6 +28,9 @@ func (impl *StudentAttendanceServiceImpl) GetStudentAttendance(username string, 
 		return false, nil
 	}
 
-	allAttendances := impl.repository.GetStudentAttendance(username, data)
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
+
+	allAttendances := impl.repository.GetStudentAttendance(username, data, startDate, endDate)
 	return true, allAttendances
 }
