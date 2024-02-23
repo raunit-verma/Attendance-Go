@@ -33,6 +33,6 @@ func (impl *TeacherAttendanceServiceImpl) GetTeacherAttendance(username string, 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
-	allAttendances := impl.repository.GetTeacherAttendance(teacherId, data, startDate, endDate)
+	allAttendances := impl.repository.GetTeacherAttendance(teacherId, startDate, endDate)
 	return http.StatusAccepted, repository.ErrorJSON{}, allAttendances
 }

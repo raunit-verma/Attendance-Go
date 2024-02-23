@@ -32,6 +32,6 @@ func (impl *ClassAttendanceImpl) GetClassAttendance(username string, data reposi
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 23, 59, 59)
 
-	allStudentList := impl.repository.GetClassAttendance(data, startDate, endDate)
+	allStudentList := impl.repository.GetClassAttendance(data.Class, startDate, endDate)
 	return http.StatusAccepted, repository.ErrorJSON{}, allStudentList
 }

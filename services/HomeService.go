@@ -39,7 +39,7 @@ func (impl *HomeServiceImpl) TeacherDashboardService(username string, requestDat
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
-	allAttendance := impl.repository.GetTeacherAttendance(username, data, startDate, endDate)
+	allAttendance := impl.repository.GetTeacherAttendance(username, startDate, endDate)
 	monthlyAttendance, duration := getMonthlyAttendance(allAttendance)
 	return repository.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
 }
@@ -50,13 +50,17 @@ func (impl *HomeServiceImpl) StudentDashboardService(username string, requestDat
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
-	allAttendance := impl.repository.GetStudentAttendance(username, data, startDate, endDate)
+	allAttendance := impl.repository.GetStudentAttendance(username, startDate, endDate)
 	monthlyAttendance, duration := getMonthlyAttendance(allAttendance)
 	return repository.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
 }
 
-func (impl *HomeServiceImpl) PrincipalDashboardService(requestData repository.GetHomeJSON) (map[string]int, repository.ErrorJSON) {
-	totalStudentPresent, totalTeacherPresent, totalStudent, totalTeacher := impl.repository.GetDailyStats(requestData)
+func (impl *HomeServiceImpl) PrincipalDashboardService(data repository.GetHomeJSON) (map[string]int, repository.ErrorJSON) {
+
+	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 0, 0, 0)
+	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 23, 59, 59)
+
+	totalStudentPresent, totalTeacherPresent, totalStudent, totalTeacher := impl.repository.GetDailyStats(data, startDate, endDate)
 	if totalStudentPresent == -1 {
 		return nil, repository.ErrorJSON{ErrorCode: 7, Message: util.DBError_Seven}
 	}

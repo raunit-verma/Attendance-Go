@@ -68,6 +68,7 @@ func (impl *PunchInOutServiceImpl) PunchOut(username string) (int, repository.Er
 	}
 
 	_, currentTime := util.FormateDateTime(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+	punchIn[0].PunchOutDate = currentTime
 
 	err := impl.repository.AddNewPunchOut(user.Username, punchIn[0], currentTime)
 

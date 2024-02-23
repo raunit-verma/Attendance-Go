@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"attendance/util"
 	"fmt"
 	"time"
 
@@ -16,10 +15,10 @@ type Repository interface {
 	GetCurrentStatus(username string, startDate string, endDate string) (bool, []Attendance)
 	AddNewPunchIn(username string, currentTime time.Time) error
 	AddNewPunchOut(username string, attendance Attendance, currentTime time.Time) error
-	GetTeacherAttendance(username string, data GetTeacherAttendanceJSON, startDate string, endDate string) []Attendance
-	GetClassAttendance(data GetClassAttendanceJSON, startDate string, endDate string) []StudentAttendanceJSON
-	GetStudentAttendance(username string, data GetStudentAttendanceJSON, startDate string, endDate string) []Attendance
-	GetDailyStats(data GetHomeJSON) (int, int, int, int)
+	GetTeacherAttendance(username string, startDate string, endDate string) []Attendance
+	GetClassAttendance(class int, startDate string, endDate string) []StudentAttendanceJSON
+	GetStudentAttendance(username string, startDate string, endDate string) []Attendance
+	GetDailyStats(data GetHomeJSON, startDate string, endDate string) (int, int, int, int)
 }
 
 type RepositoryImpl struct {
@@ -88,8 +87,6 @@ func (impl *RepositoryImpl) AddNewPunchIn(username string, currentTime time.Time
 }
 
 func (impl *RepositoryImpl) AddNewPunchOut(username string, attendance Attendance, currentTime time.Time) error {
-
-	attendance.PunchOutDate = currentTime
 	_, err := impl.db.Model(&attendance).Where("attendance_id = ?", attendance.AttendanceID).Column("punch_out_date").Update()
 	if err != nil {
 		zap.L().Error("Cannot add new punch out of user "+username, zap.Error(err))
@@ -98,7 +95,7 @@ func (impl *RepositoryImpl) AddNewPunchOut(username string, attendance Attendanc
 	return nil
 }
 
-func (impl *RepositoryImpl) GetTeacherAttendance(username string, data GetTeacherAttendanceJSON, startDate string, endDate string) []Attendance {
+func (impl *RepositoryImpl) GetTeacherAttendance(username string, startDate string, endDate string) []Attendance {
 	var attendances []Attendance
 
 	err := impl.db.Model(&attendances).Where("username=?", username).Where("punch_in_date BETWEEN ? AND ?", startDate, endDate).Select()
@@ -111,7 +108,7 @@ func (impl *RepositoryImpl) GetTeacherAttendance(username string, data GetTeache
 	return attendances
 }
 
-func (impl *RepositoryImpl) GetClassAttendance(data GetClassAttendanceJSON, startDate string, endDate string) []StudentAttendanceJSON {
+func (impl *RepositoryImpl) GetClassAttendance(class int, startDate string, endDate string) []StudentAttendanceJSON {
 	var results []StudentAttendanceJSON
 
 	err := impl.db.Model(&results).
@@ -119,7 +116,7 @@ func (impl *RepositoryImpl) GetClassAttendance(data GetClassAttendanceJSON, star
 		Column("users.full_name").
 		Join("JOIN attendances a ON users.username = a.username").
 		Table("users").
-		Where("users.class = ?", data.Class).
+		Where("users.class = ?", class).
 		Where("a.punch_in_date BETWEEN ? AND ?", startDate, endDate).
 		Where("users.role=?", "student").
 		Select()
@@ -132,7 +129,7 @@ func (impl *RepositoryImpl) GetClassAttendance(data GetClassAttendanceJSON, star
 	return results
 }
 
-func (impl *RepositoryImpl) GetStudentAttendance(username string, data GetStudentAttendanceJSON, startDate string, endDate string) []Attendance {
+func (impl *RepositoryImpl) GetStudentAttendance(username string, startDate string, endDate string) []Attendance {
 	var results []Attendance
 
 	err := impl.db.Model(&results).Where("username=?", username).Where("punch_in_date BETWEEN ? AND ?", startDate, endDate).Select()
@@ -145,9 +142,7 @@ func (impl *RepositoryImpl) GetStudentAttendance(username string, data GetStuden
 	return results
 }
 
-func (impl *RepositoryImpl) GetDailyStats(data GetHomeJSON) (int, int, int, int) {
-	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 0, 0, 0)
-	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 23, 59, 59)
+func (impl *RepositoryImpl) GetDailyStats(data GetHomeJSON, startDate string, endDate string) (int, int, int, int) {
 	var totalTeacherPresent int
 	var totalStudentPresent int
 	var totalStudent int

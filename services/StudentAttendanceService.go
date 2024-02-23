@@ -31,6 +31,6 @@ func (impl *StudentAttendanceServiceImpl) GetStudentAttendance(username string, 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
-	allAttendances := impl.repository.GetStudentAttendance(username, data, startDate, endDate)
+	allAttendances := impl.repository.GetStudentAttendance(username, startDate, endDate)
 	return true, allAttendances
 }
