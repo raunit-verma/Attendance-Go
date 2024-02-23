@@ -80,16 +80,16 @@ func FormateDateTime(year int, month time.Month, date int, hour int, min int, se
 	layout := "2006-01-02 15:04:05-07:00"
 	timeString := punchInDateIST.Format(layout)
 	parsedTime, err := time.Parse(layout, timeString)
+	if err != nil {
+		zap.L().Error("Error in formatting time.", zap.Error(err))
+	}
 	return timeString, parsedTime
 }
 
 // Match hashed password with bcrypt
 func MatchPassword(hashedPassword []byte, password []byte) bool {
 	err := bcrypt.CompareHashAndPassword(hashedPassword, password)
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // Hash Password
@@ -113,7 +113,7 @@ func IsStrongPassword(password string) (bool, string) {
 		hasLowerCase bool
 		hasDigit     bool
 	)
-
+	message := ""
 	for _, char := range password {
 		switch {
 		case unicode.IsUpper(char):
@@ -124,7 +124,17 @@ func IsStrongPassword(password string) (bool, string) {
 			hasDigit = true
 		}
 	}
-	return hasUpperCase && hasLowerCase && hasDigit, " Password must have one uppercase, one lowercase & one digit."
+
+	switch {
+	case !hasUpperCase:
+		message += "Uppercase missing. "
+	case !hasLowerCase:
+		message += "Lowercase missing. "
+	case !hasDigit:
+		message += "Number missing."
+	}
+
+	return hasUpperCase && hasLowerCase && hasDigit, message
 }
 
 // // calculate daily attendance

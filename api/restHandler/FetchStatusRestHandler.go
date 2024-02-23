@@ -28,5 +28,7 @@ func (impl *FetchStatusImpl) FetchStatus(w http.ResponseWriter, r *http.Request)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
-	impl.fetchStatusService.FetchStatus(w, r, username)
+	student_status := impl.fetchStatusService.FetchStatus(username)
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(student_status)
 }

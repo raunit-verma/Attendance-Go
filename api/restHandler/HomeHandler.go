@@ -62,10 +62,17 @@ func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if role == "student" {
-		impl.homeService.StudentDashboardService(w, r, username, newHomeRequest)
+		data := impl.homeService.StudentDashboardService(username, newHomeRequest)
+		json.NewEncoder(w).Encode(data)
 	} else if role == "teacher" {
-		impl.homeService.TeacherDashboardService(w, r, username, newHomeRequest)
+		data := impl.homeService.TeacherDashboardService(username, newHomeRequest)
+		json.NewEncoder(w).Encode(data)
 	} else if role == "principal" {
-		impl.homeService.PrincipalDashboardService(w, r, newHomeRequest)
+		data, errorJSON := impl.homeService.PrincipalDashboardService(newHomeRequest)
+		if data != nil {
+			json.NewEncoder(w).Encode(data)
+		} else {
+			json.NewEncoder(w).Encode(errorJSON)
+		}
 	}
 }

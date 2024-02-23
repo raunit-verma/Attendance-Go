@@ -2,7 +2,6 @@ package repository
 
 import (
 	"attendance/util"
-	"encoding/json"
 	"net/http"
 	"os"
 	"time"
@@ -74,7 +73,7 @@ type DashboardJSON struct {
 	Second            int    `json:"second"`
 }
 
-func (newUser User) IsNewUserDataMissing(w http.ResponseWriter, r *http.Request) bool {
+func (newUser User) IsNewUserDataMissing() (int, bool, ErrorJSON) {
 	IsDataMissing := false
 	Message := ""
 
@@ -99,19 +98,20 @@ func (newUser User) IsNewUserDataMissing(w http.ResponseWriter, r *http.Request)
 		zap.L().Info("Not a valid email")
 		Message = " Email is missing or not a valid email. "
 	} else if newUser.Role != "teacher" && newUser.Role != "student" {
+		IsDataMissing = true
 		zap.L().Info("Not a valid role")
 		Message = " Role is missing. "
 	}
 
 	if IsDataMissing {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(ErrorJSON{ErrorCode: 3, Message: Message + util.UserDataMissing_Three})
+		return http.StatusBadRequest, IsDataMissing, ErrorJSON{ErrorCode: 3, Message: Message + util.UserDataMissing_Three}
 	}
 
-	return IsDataMissing
+	return http.StatusAccepted, IsDataMissing, ErrorJSON{}
 }
 
 func CreateSchema(db *pg.DB) error {
+
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS "users" (
 		"username" VARCHAR(255) PRIMARY KEY,
 		"password" VARCHAR(255),
@@ -127,6 +127,7 @@ func CreateSchema(db *pg.DB) error {
 	} else {
 		zap.L().Info("Schema created for users")
 	}
+
 	query := `insert into users values ('user','` + os.Getenv("PRINCIPAL_PASSWORD") + `','Principal',1,'ramverma@gmail.com','principal')`
 
 	_, err = db.Exec(query)
@@ -160,7 +161,7 @@ func CreateSchema(db *pg.DB) error {
 	pgErr, ok := err.(pg.Error)
 
 	if ok && pgErr.Field('C') == "42710" {
-		zap.L().Warn("Foreign key already exist")
+		zap.L().Info("Foreign key already exist")
 	} else if err != nil {
 		zap.L().Fatal("Error creating foregin key for attendance", zap.Error(err))
 		return err

@@ -10,8 +10,8 @@ import (
 )
 
 type PunchInOutHandler interface {
-	PunchInHandler(w http.ResponseWriter, r *http.Request)
-	PunchOutHandler(w http.ResponseWriter, r *http.Request)
+	PunchIn(w http.ResponseWriter, r *http.Request)
+	PunchOut(w http.ResponseWriter, r *http.Request)
 }
 
 type PunchInOutImpl struct {
@@ -22,26 +22,26 @@ func NewPunchInOutImpl(punchInOutService services.PunchInOutService) *PunchInOut
 	return &PunchInOutImpl{punchInOutService: punchInOutService}
 }
 
-func (impl *PunchInOutImpl) PunchInHandler(w http.ResponseWriter, r *http.Request) {
+func (impl *PunchInOutImpl) PunchIn(w http.ResponseWriter, r *http.Request) {
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
-	impl.punchInOutService.PunchInService(username, w, r)
-
-	return
+	status, errorJSON := impl.punchInOutService.PunchIn(username)
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(errorJSON)
 }
 
-func (impl *PunchInOutImpl) PunchOutHandler(w http.ResponseWriter, r *http.Request) {
+func (impl *PunchInOutImpl) PunchOut(w http.ResponseWriter, r *http.Request) {
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
-	impl.punchInOutService.PunchOutService(username, w, r)
-
-	return
+	status, errorJSON := impl.punchInOutService.PunchOut(username)
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(errorJSON)
 }

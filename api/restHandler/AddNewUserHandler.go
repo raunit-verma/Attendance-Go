@@ -24,7 +24,6 @@ func NewAddNewUserImpl(addNewUserService services.AddNewUserService) *AddNewUser
 }
 
 func (impl *AddNewUserImpl) AddNewUser(w http.ResponseWriter, r *http.Request) {
-
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
@@ -42,7 +41,7 @@ func (impl *AddNewUserImpl) AddNewUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	impl.addNewUserService.AddNewUser(newUser, username, w, r)
-
-	return
+	status, errorJSON := impl.addNewUserService.AddNewUser(newUser, username)
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(errorJSON)
 }

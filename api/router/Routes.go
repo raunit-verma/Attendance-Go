@@ -15,9 +15,9 @@ type MUXRouterImpl struct {
 	loginHandler                restHandler.LoginHandler
 	addNewUserHandler           restHandler.AddNewUserHandler
 	punchInOutHandler           restHandler.PunchInOutHandler
-	getTeacherAttendanceHandler restHandler.GetTeacherAttendanceHandler
-	getClassAttendanceHandler   restHandler.GetClassAttendanceHandler
-	getStudentAttandance        restHandler.GetStudentAttendanceHandler
+	getTeacherAttendanceHandler restHandler.TeacherAttendanceHandler
+	getClassAttendanceHandler   restHandler.ClassAttendanceHandler
+	getStudentAttandance        restHandler.StudentAttendanceHandler
 	fetchStatusHandler          restHandler.FetchStatusHandler
 }
 
@@ -26,9 +26,9 @@ func NewMUXRouterImpl(
 	loginHandler restHandler.LoginHandler,
 	addNewUserHandler restHandler.AddNewUserHandler,
 	punchInOutHandler restHandler.PunchInOutHandler,
-	getTeacherAttendanceHandler restHandler.GetTeacherAttendanceHandler,
-	getClassAttendanceHandler restHandler.GetClassAttendanceHandler,
-	getStudentAttandance restHandler.GetStudentAttendanceHandler,
+	getTeacherAttendanceHandler restHandler.TeacherAttendanceHandler,
+	getClassAttendanceHandler restHandler.ClassAttendanceHandler,
+	getStudentAttandance restHandler.StudentAttendanceHandler,
 	fetchStatusHandler restHandler.FetchStatusHandler) *MUXRouterImpl {
 	return &MUXRouterImpl{
 		homeHandler:                 homeHandler,
@@ -64,8 +64,8 @@ func (impl *MUXRouterImpl) NewMUXRouter() *mux.Router {
 	r.HandleFunc("/addnewuser", impl.addNewUserHandler.AddNewUser).Methods("POST")
 
 	// Route for Punch-in and Punch-out
-	r.HandleFunc("/punchin", impl.punchInOutHandler.PunchInHandler).Methods("GET")
-	r.HandleFunc("/punchout", impl.punchInOutHandler.PunchOutHandler).Methods("GET")
+	r.HandleFunc("/punchin", impl.punchInOutHandler.PunchIn).Methods("GET")
+	r.HandleFunc("/punchout", impl.punchInOutHandler.PunchOut).Methods("GET")
 
 	// Route for Teacher attendence for particular month accessible by Principal and Teacher
 	r.HandleFunc("/getteacherattendance", impl.getTeacherAttendanceHandler.GetTeacherAttendance).Methods("POST")

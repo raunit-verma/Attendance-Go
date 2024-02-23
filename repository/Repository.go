@@ -13,7 +13,7 @@ import (
 type Repository interface {
 	GetUser(username string) *User
 	AddNewUser(user *User) error
-	GetCurrentStatus(username string) (bool, []Attendance)
+	GetCurrentStatus(username string, startDate string, endDate string) (bool, []Attendance)
 	AddNewPunchIn(username string) error
 	AddNewPunchOut(username string, attendance Attendance) error
 	GetTeacherAttendance(username string, data GetTeacherAttendanceJSON) []Attendance
@@ -37,29 +37,24 @@ func (impl *RepositoryImpl) GetUser(username string) *User {
 
 	if err != nil {
 		zap.L().Info("No record found in DB", zap.String("username", username))
+		return nil
 	}
 	return user
 }
 
 func (impl *RepositoryImpl) AddNewUser(user *User) error {
-	hashedPassword, err := util.GenerateHashFromPassword(user.Password)
+
+	_, err := impl.db.Model(user).Insert()
+
 	if err != nil {
-		zap.L().Info("Error in hashing password.", zap.Error(err))
+		zap.L().Error("Error in inserting new user.", zap.Error(err))
 		return err
 	}
-	user.Password = hashedPassword
-	_, err = impl.db.Model(user).Insert()
-	if err != nil {
-		zap.L().Info("Error adding new user to DB.", zap.Error(err))
-		return err
-	}
+
 	return nil
 }
 
-func (impl *RepositoryImpl) GetCurrentStatus(username string) (bool, []Attendance) {
-	t := time.Now()
-	startDate, _ := util.FormateDateTime(t.Year(), t.Month(), t.Day(), 0, 0, 0)
-	endDate, _ := util.FormateDateTime(t.Year(), t.Month(), t.Day(), 23, 59, 59)
+func (impl *RepositoryImpl) GetCurrentStatus(username string, startDate string, endDate string) (bool, []Attendance) {
 
 	var attendances []Attendance
 	err := impl.db.Model(&attendances).

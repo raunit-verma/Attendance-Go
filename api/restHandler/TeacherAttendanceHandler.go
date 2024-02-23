@@ -11,16 +11,16 @@ import (
 	"go.uber.org/zap"
 )
 
-type GetTeacherAttendanceHandler interface {
+type TeacherAttendanceHandler interface {
 	GetTeacherAttendance(w http.ResponseWriter, r *http.Request)
 }
 
-type GetTeacherAttendanceImpl struct {
-	getTeacherAttendance services.GetTeacherAttendanceService
+type TeacherAttendanceImpl struct {
+	teacherAttendance services.TeacherAttendanceService
 }
 
-func NewGetTeacherAttendanceImpl(getTeacherAttendance services.GetTeacherAttendanceService) *GetTeacherAttendanceImpl {
-	return &GetTeacherAttendanceImpl{getTeacherAttendance: getTeacherAttendance}
+func NewTeacherAttendanceImpl(teacherAttendance services.TeacherAttendanceService) *TeacherAttendanceImpl {
+	return &TeacherAttendanceImpl{teacherAttendance: teacherAttendance}
 }
 
 func ValidateTeacherRequestData(data repository.GetTeacherAttendanceJSON) (bool, string) {
@@ -37,7 +37,7 @@ func ValidateTeacherRequestData(data repository.GetTeacherAttendanceJSON) (bool,
 	return false, ""
 }
 
-func (impl *GetTeacherAttendanceImpl) GetTeacherAttendance(w http.ResponseWriter, r *http.Request) {
+func (impl *TeacherAttendanceImpl) GetTeacherAttendance(w http.ResponseWriter, r *http.Request) {
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
@@ -61,6 +61,11 @@ func (impl *GetTeacherAttendanceImpl) GetTeacherAttendance(w http.ResponseWriter
 		return
 	}
 
-	impl.getTeacherAttendance.GetTeacherAttendance(username, newTeacherAttendanceRequest.ID, newTeacherAttendanceRequest, w, r)
-	return
+	status, errorJSON, allAttendance := impl.teacherAttendance.GetTeacherAttendance(username, newTeacherAttendanceRequest.ID, newTeacherAttendanceRequest)
+	w.WriteHeader(status)
+	if status != http.StatusAccepted {
+		json.NewEncoder(w).Encode(errorJSON)
+	} else {
+		json.NewEncoder(w).Encode(allAttendance)
+	}
 }

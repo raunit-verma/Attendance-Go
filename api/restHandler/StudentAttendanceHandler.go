@@ -11,45 +11,38 @@ import (
 	"go.uber.org/zap"
 )
 
-type GetClassAttendanceHandler interface {
-	GetClassAttendance(w http.ResponseWriter, r *http.Request)
+type StudentAttendanceHandler interface {
+	GetStudentAttendance(w http.ResponseWriter, r *http.Request)
 }
 
-type GetClassAttendanceImpl struct {
-	getClassAttendance services.GetClassAttendanceService
+type StudentAttendanceImpl struct {
+	studentAttendance services.StudentAttendanceService
 }
 
-func NewGetClassAttendanceImpl(getClassAttendance services.GetClassAttendanceService) *GetClassAttendanceImpl {
-	return &GetClassAttendanceImpl{getClassAttendance: getClassAttendance}
+func NewStudentAttendanceImpl(studentAttendance services.StudentAttendanceService) *StudentAttendanceImpl {
+	return &StudentAttendanceImpl{studentAttendance: studentAttendance}
 }
 
-func ValidateClassRequestData(data repository.GetClassAttendanceJSON) (bool, string) {
-	if data.Class <= 0 || data.Class > 12 {
-		zap.L().Info("Requested class is not valid")
-		return true, "Class is not valid. "
-	} else if data.Month <= 0 || data.Month > 12 {
+func ValidateStudentRequestData(data repository.GetStudentAttendanceJSON) (bool, string) {
+	if data.Month <= 0 || data.Month > 12 {
 		zap.L().Info("Requested month is not valid")
 		return true, "Month is not valid. "
 	} else if data.Year <= 2020 || data.Year >= 2100 {
 		zap.L().Info("Request year is not valid")
 		return true, "Year is not valid. "
-	} else if data.Day <= 0 || data.Day > 31 {
-		zap.L().Info("Requested day is not valid")
-		return true, "Day is not valid. "
 	}
 	return false, ""
 }
 
-func (impl *GetClassAttendanceImpl) GetClassAttendance(w http.ResponseWriter, r *http.Request) {
+func (impl *StudentAttendanceImpl) GetStudentAttendance(w http.ResponseWriter, r *http.Request) {
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
-		zap.L().Error("User not verified", zap.String("Code", "1"))
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
 
-	newStudentAttendanceRequest := repository.GetClassAttendanceJSON{}
+	newStudentAttendanceRequest := repository.GetStudentAttendanceJSON{}
 	err := json.NewDecoder(r.Body).Decode(&newStudentAttendanceRequest)
 	if err != nil {
 		zap.L().Error("Cannot decode json data for student attendance request", zap.Error(err))
@@ -57,7 +50,7 @@ func (impl *GetClassAttendanceImpl) GetClassAttendance(w http.ResponseWriter, r 
 		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.CannotDecodePayload_Two, ErrorCode: 2})
 		return
 	}
-	flag, message := ValidateClassRequestData(newStudentAttendanceRequest)
+	flag, message := ValidateStudentRequestData(newStudentAttendanceRequest)
 	if flag {
 		zap.L().Info("Student attendance request data validation failed.")
 		w.WriteHeader(http.StatusBadRequest)
@@ -65,6 +58,12 @@ func (impl *GetClassAttendanceImpl) GetClassAttendance(w http.ResponseWriter, r 
 		return
 	}
 
-	impl.getClassAttendance.GetClassAttendance(username, newStudentAttendanceRequest, w, r)
-	return
+	flag, allAttendance := impl.studentAttendance.GetStudentAttendance(username, newStudentAttendanceRequest)
+	if !flag {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(repository.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One})
+	} else {
+		w.WriteHeader(http.StatusAccepted)
+		json.NewEncoder(w).Encode(allAttendance)
+	}
 }
