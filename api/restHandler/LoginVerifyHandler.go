@@ -2,6 +2,7 @@ package restHandler
 
 import (
 	auth "attendance/api/auth"
+	"attendance/bean"
 	"attendance/repository"
 	"attendance/util"
 	"encoding/json"
@@ -31,7 +32,7 @@ func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {
 
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
+		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
 
@@ -59,7 +60,7 @@ func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {
 	if user.Username == "" {
 		zap.L().Info("No user found", zap.String("Username", username))
 		w.WriteHeader(http.StatusBadGateway)
-		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.UserNotFound_Six, ErrorCode: 6})
+		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.UserNotFound_Six, ErrorCode: 6})
 		return
 	}
 	user.Password = ""
@@ -71,7 +72,7 @@ func (impl *LoginImpl) VerifyToken(w http.ResponseWriter, r *http.Request) {
 	status, username, _ := auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
+		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
 	user := impl.repository.GetUser(username)

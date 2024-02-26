@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"attendance/bean"
 	"fmt"
 	"time"
 
@@ -16,9 +17,9 @@ type Repository interface {
 	AddNewPunchIn(username string, currentTime time.Time) error
 	AddNewPunchOut(username string, attendance Attendance, currentTime time.Time) error
 	GetTeacherAttendance(username string, startDate string, endDate string) []Attendance
-	GetClassAttendance(class int, startDate string, endDate string) []StudentAttendanceJSON
+	GetClassAttendance(class int, startDate string, endDate string) []bean.StudentAttendanceJSON
 	GetStudentAttendance(username string, startDate string, endDate string) []Attendance
-	GetDailyStats(data GetHomeJSON, startDate string, endDate string) (int, int, int, int)
+	GetDailyStats(data bean.GetHomeJSON, startDate string, endDate string) (int, int, int, int)
 }
 
 type RepositoryImpl struct {
@@ -108,8 +109,8 @@ func (impl *RepositoryImpl) GetTeacherAttendance(username string, startDate stri
 	return attendances
 }
 
-func (impl *RepositoryImpl) GetClassAttendance(class int, startDate string, endDate string) []StudentAttendanceJSON {
-	var results []StudentAttendanceJSON
+func (impl *RepositoryImpl) GetClassAttendance(class int, startDate string, endDate string) []bean.StudentAttendanceJSON {
+	var results []bean.StudentAttendanceJSON
 
 	err := impl.db.Model(&results).
 		ColumnExpr("DISTINCT users.username").
@@ -142,7 +143,7 @@ func (impl *RepositoryImpl) GetStudentAttendance(username string, startDate stri
 	return results
 }
 
-func (impl *RepositoryImpl) GetDailyStats(data GetHomeJSON, startDate string, endDate string) (int, int, int, int) {
+func (impl *RepositoryImpl) GetDailyStats(data bean.GetHomeJSON, startDate string, endDate string) (int, int, int, int) {
 	var totalTeacherPresent int
 	var totalStudentPresent int
 	var totalStudent int

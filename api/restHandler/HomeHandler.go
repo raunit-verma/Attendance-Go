@@ -2,7 +2,7 @@ package restHandler
 
 import (
 	auth "attendance/api/auth"
-	"attendance/repository"
+	"attendance/bean"
 	"attendance/services"
 	"attendance/util"
 	"encoding/json"
@@ -23,7 +23,7 @@ func NewHomeImpl(homeService services.HomeService) *HomeImpl {
 	return &HomeImpl{homeService: homeService}
 }
 
-func ValidateRequestData(data repository.GetHomeJSON) (bool, string) {
+func ValidateRequestData(data bean.GetHomeJSON) (bool, string) {
 	if data.Month <= 0 || data.Month > 12 {
 		zap.L().Info("Requested month is not valid")
 		return true, "Month is not valid. "
@@ -39,17 +39,17 @@ func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
 
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
+		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
 		return
 	}
 
-	newHomeRequest := repository.GetHomeJSON{}
+	newHomeRequest := bean.GetHomeJSON{}
 	err := json.NewDecoder(r.Body).Decode(&newHomeRequest)
 
 	if err != nil {
 		zap.L().Error("Cannot decode json data for home request", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: util.CannotDecodePayload_Two, ErrorCode: 2})
+		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.CannotDecodePayload_Two, ErrorCode: 2})
 		return
 	}
 
@@ -58,7 +58,7 @@ func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
 	if flag {
 		zap.L().Info("Home request data validation failed.")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(repository.ErrorJSON{Message: message + util.RequestDataValidation_Five, ErrorCode: 5})
+		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: message + util.RequestDataValidation_Five, ErrorCode: 5})
 		return
 	}
 	if role == "student" {

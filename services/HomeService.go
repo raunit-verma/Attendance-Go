@@ -1,15 +1,16 @@
 package services
 
 import (
+	"attendance/bean"
 	"attendance/repository"
 	"attendance/util"
 	"time"
 )
 
 type HomeService interface {
-	TeacherDashboardService(username string, requestData repository.GetHomeJSON) repository.DashboardJSON
-	StudentDashboardService(username string, requestData repository.GetHomeJSON) repository.DashboardJSON
-	PrincipalDashboardService(requestData repository.GetHomeJSON) (map[string]int, repository.ErrorJSON)
+	TeacherDashboardService(username string, requestData bean.GetHomeJSON) bean.DashboardJSON
+	StudentDashboardService(username string, requestData bean.GetHomeJSON) bean.DashboardJSON
+	PrincipalDashboardService(requestData bean.GetHomeJSON) (map[string]int, bean.ErrorJSON)
 }
 
 type HomeServiceImpl struct {
@@ -33,36 +34,36 @@ func getMonthlyAttendance(allAttendance []repository.Attendance) ([32]bool, time
 	return monthlyAttendance, duration
 }
 
-func (impl *HomeServiceImpl) TeacherDashboardService(username string, requestData repository.GetHomeJSON) repository.DashboardJSON {
-	data := repository.GetTeacherAttendanceJSON{ID: username, Month: requestData.Month, Year: requestData.Year}
+func (impl *HomeServiceImpl) TeacherDashboardService(username string, requestData bean.GetHomeJSON) bean.DashboardJSON {
+	data := bean.GetTeacherAttendanceJSON{ID: username, Month: requestData.Month, Year: requestData.Year}
 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
 	allAttendance := impl.repository.GetTeacherAttendance(username, startDate, endDate)
 	monthlyAttendance, duration := getMonthlyAttendance(allAttendance)
-	return repository.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
+	return bean.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
 }
 
-func (impl *HomeServiceImpl) StudentDashboardService(username string, requestData repository.GetHomeJSON) repository.DashboardJSON {
-	data := repository.GetStudentAttendanceJSON{Month: requestData.Month, Year: requestData.Year}
+func (impl *HomeServiceImpl) StudentDashboardService(username string, requestData bean.GetHomeJSON) bean.DashboardJSON {
+	data := bean.GetStudentAttendanceJSON{Month: requestData.Month, Year: requestData.Year}
 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 31, 23, 59, 59)
 
 	allAttendance := impl.repository.GetStudentAttendance(username, startDate, endDate)
 	monthlyAttendance, duration := getMonthlyAttendance(allAttendance)
-	return repository.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
+	return bean.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
 }
 
-func (impl *HomeServiceImpl) PrincipalDashboardService(data repository.GetHomeJSON) (map[string]int, repository.ErrorJSON) {
+func (impl *HomeServiceImpl) PrincipalDashboardService(data bean.GetHomeJSON) (map[string]int, bean.ErrorJSON) {
 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 23, 59, 59)
 
 	totalStudentPresent, totalTeacherPresent, totalStudent, totalTeacher := impl.repository.GetDailyStats(data, startDate, endDate)
 	if totalStudentPresent == -1 {
-		return nil, repository.ErrorJSON{ErrorCode: 7, Message: util.DBError_Seven}
+		return nil, bean.ErrorJSON{ErrorCode: 7, Message: util.DBError_Seven}
 	}
-	return map[string]int{"totalStudentPresent": totalStudentPresent, "totalTeacherPresent": totalTeacherPresent, "totalStudent": totalStudent, "totalTeacher": totalTeacher}, repository.ErrorJSON{}
+	return map[string]int{"totalStudentPresent": totalStudentPresent, "totalTeacherPresent": totalTeacherPresent, "totalStudent": totalStudent, "totalTeacher": totalTeacher}, bean.ErrorJSON{}
 }

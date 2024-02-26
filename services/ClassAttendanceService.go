@@ -1,6 +1,7 @@
 package services
 
 import (
+	"attendance/bean"
 	"attendance/repository"
 	"attendance/util"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 )
 
 type ClassAttendanceService interface {
-	GetClassAttendance(username string, data repository.GetClassAttendanceJSON) (int, repository.ErrorJSON, []repository.StudentAttendanceJSON)
+	GetClassAttendance(username string, data bean.GetClassAttendanceJSON) (int, bean.ErrorJSON, []bean.StudentAttendanceJSON)
 }
 
 type ClassAttendanceImpl struct {
@@ -21,17 +22,17 @@ func NewClassAttendanceImpl(repository repository.Repository) *ClassAttendanceIm
 	return &ClassAttendanceImpl{repository: repository}
 }
 
-func (impl *ClassAttendanceImpl) GetClassAttendance(username string, data repository.GetClassAttendanceJSON) (int, repository.ErrorJSON, []repository.StudentAttendanceJSON) {
+func (impl *ClassAttendanceImpl) GetClassAttendance(username string, data bean.GetClassAttendanceJSON) (int, bean.ErrorJSON, []bean.StudentAttendanceJSON) {
 	user := impl.repository.GetUser(username)
 
 	if user != nil && user.Role != "teacher" {
 		zap.L().Info("Not authorized to get student attendance details")
-		return http.StatusUnauthorized, repository.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1}, nil
+		return http.StatusUnauthorized, bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1}, nil
 	}
 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Day, 23, 59, 59)
 
 	allStudentList := impl.repository.GetClassAttendance(data.Class, startDate, endDate)
-	return http.StatusAccepted, repository.ErrorJSON{}, allStudentList
+	return http.StatusAccepted, bean.ErrorJSON{}, allStudentList
 }

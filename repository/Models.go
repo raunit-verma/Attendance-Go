@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"attendance/bean"
 	"attendance/util"
 	"net/http"
 	"os"
@@ -26,54 +27,7 @@ type Attendance struct {
 	PunchOutDate time.Time `pg:"punch_out_date"`
 }
 
-type AttendanceJSON struct {
-	PunchInDate  time.Time `pg:"punch_in_date"`
-	PunchOutDate time.Time `pg:"punch_out_date"`
-}
-
-type GetTeacherAttendanceJSON struct {
-	ID    string `json:"id"`
-	Month int    `json:"month"`
-	Year  int    `json:"year"`
-}
-
-type StudentAttendanceJSON struct {
-	TableName struct{} `sql:"users" json:"-"`
-	Username  string   `pg:"username"`
-	FullName  string   `pg:"full_name"`
-}
-
-type ErrorJSON struct {
-	Message   string `json:"message"`
-	ErrorCode int    `json:"code"`
-}
-
-type GetClassAttendanceJSON struct {
-	Class int `json:"class"`
-	Day   int `json:"day"`
-	Month int `json:"month"`
-	Year  int `json:"year"`
-}
-
-type GetStudentAttendanceJSON struct {
-	Month int `json:"month"`
-	Year  int `json:"year"`
-}
-
-type GetHomeJSON struct {
-	Date  int `json:"date"`
-	Month int `json:"month"`
-	Year  int `json:"year"`
-}
-
-type DashboardJSON struct {
-	MonthlyAttendance []bool `json:"monthly_attendance"`
-	Hour              int    `json:"hour"`
-	Minute            int    `json:"minute"`
-	Second            int    `json:"second"`
-}
-
-func (newUser User) IsNewUserDataMissing() (int, bool, ErrorJSON) {
+func (newUser User) IsNewUserDataMissing() (int, bool, bean.ErrorJSON) {
 	IsDataMissing := false
 	Message := ""
 
@@ -104,10 +58,10 @@ func (newUser User) IsNewUserDataMissing() (int, bool, ErrorJSON) {
 	}
 
 	if IsDataMissing {
-		return http.StatusBadRequest, IsDataMissing, ErrorJSON{ErrorCode: 3, Message: Message + util.UserDataMissing_Three}
+		return http.StatusBadRequest, IsDataMissing, bean.ErrorJSON{ErrorCode: 3, Message: Message + util.UserDataMissing_Three}
 	}
 
-	return http.StatusAccepted, IsDataMissing, ErrorJSON{}
+	return http.StatusAccepted, IsDataMissing, bean.ErrorJSON{}
 }
 
 func CreateSchema(db *pg.DB) error {

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"attendance/bean"
 	"attendance/repository"
 	"attendance/util"
 	"time"
@@ -9,7 +10,7 @@ import (
 )
 
 type StudentAttendanceService interface {
-	GetStudentAttendance(username string, data repository.GetStudentAttendanceJSON) (bool, []repository.Attendance)
+	GetStudentAttendance(username string, data bean.GetStudentAttendanceJSON) (bool, []repository.Attendance)
 }
 
 type StudentAttendanceServiceImpl struct {
@@ -20,7 +21,7 @@ func NewStudentAttendanceServiceImpl(repository repository.Repository) *StudentA
 	return &StudentAttendanceServiceImpl{repository: repository}
 }
 
-func (impl *StudentAttendanceServiceImpl) GetStudentAttendance(username string, data repository.GetStudentAttendanceJSON) (bool, []repository.Attendance) {
+func (impl *StudentAttendanceServiceImpl) GetStudentAttendance(username string, data bean.GetStudentAttendanceJSON) (bool, []repository.Attendance) {
 	user := impl.repository.GetUser(username)
 
 	if user != nil && user.Role != "student" {
