@@ -22,7 +22,7 @@ func NewAddNewUserServiceImpl(repository repository.Repository) *AddNewUserServi
 	return &AddNewUserServiceImpl{repository: repository}
 }
 
-func (impl *AddNewUserServiceImpl) AddNewUser(newUser repository.User, username string) (int, bean.ErrorJSON) {
+func (impl *AddNewUserServiceImpl) AddNewUser(newUser bean.User, username string) (int, bean.ErrorJSON) {
 	util.TrimSpacesFromStruct(&newUser)
 	status, flag, errorJSON := newUser.IsNewUserDataMissing()
 	if flag {
@@ -49,8 +49,8 @@ func (impl *AddNewUserServiceImpl) AddNewUser(newUser repository.User, username 
 		return http.StatusInternalServerError, bean.ErrorJSON{Message: util.InternalServererror_Eleven, ErrorCode: 11}
 	}
 	newUser.Password = hashedPassword
-
-	err = impl.repository.AddNewUser(&newUser)
+	repoUser := repository.User(newUser)
+	err = impl.repository.AddNewUser(&repoUser)
 	pgErr, ok := err.(pg.Error)
 	if err != nil {
 		if ok && pgErr.Field('C') == "23505" {

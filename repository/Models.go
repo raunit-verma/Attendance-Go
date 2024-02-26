@@ -1,9 +1,6 @@
 package repository
 
 import (
-	"attendance/bean"
-	"attendance/util"
-	"net/http"
 	"os"
 	"time"
 
@@ -25,43 +22,6 @@ type Attendance struct {
 	AttendanceID string    `pg:"attendance_id,pk" json:"-"`
 	PunchInDate  time.Time `pg:"punch_in_date"`
 	PunchOutDate time.Time `pg:"punch_out_date"`
-}
-
-func (newUser User) IsNewUserDataMissing() (int, bool, bean.ErrorJSON) {
-	IsDataMissing := false
-	Message := ""
-
-	if newUser.Username == "" {
-		IsDataMissing = true
-		Message = " Username is missing."
-		zap.L().Info("Username is empty. ")
-	} else if newUser.Password == "" {
-		IsDataMissing = true
-		zap.L().Info("Password is empty")
-		Message = " Password is missing. "
-	} else if newUser.FullName == "" {
-		IsDataMissing = true
-		zap.L().Info("Fullname is empty")
-		Message = " Fullname is missing. "
-	} else if newUser.Class <= 0 || newUser.Class > 12 {
-		IsDataMissing = true
-		zap.L().Info("Class constraint failed")
-		Message = " Class should be between 1 to 12. "
-	} else if newUser.Email != "" && !util.IsValidEmail(newUser.Email) {
-		IsDataMissing = true
-		zap.L().Info("Not a valid email")
-		Message = " Email is missing or not a valid email. "
-	} else if newUser.Role != "teacher" && newUser.Role != "student" {
-		IsDataMissing = true
-		zap.L().Info("Not a valid role")
-		Message = " Role is missing. "
-	}
-
-	if IsDataMissing {
-		return http.StatusBadRequest, IsDataMissing, bean.ErrorJSON{ErrorCode: 3, Message: Message + util.UserDataMissing_Three}
-	}
-
-	return http.StatusAccepted, IsDataMissing, bean.ErrorJSON{}
 }
 
 func CreateSchema(db *pg.DB) error {
