@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"os"
+	"attendance/bean"
 
+	"github.com/caarlos0/env"
 	"github.com/go-pg/pg"
 	"go.uber.org/zap"
 )
@@ -16,30 +17,35 @@ type DbConfig struct {
 
 var pgDb *pg.DB = nil
 
-// remove use of contansts and use utils ( bin )
 func GetDB() *pg.DB {
+
+	cfg := bean.DBConfig{}
+	if err := env.Parse(&cfg); err != nil {
+		zap.L().Error("Error Loading Env.", zap.Error(err))
+	}
+
 	if pgDb == nil {
-		if os.Getenv("TYPE") == "Development" {
+		if cfg.Type == "Development" {
 			DbConfig := DbConfig{
-				User:     os.Getenv("DB_USER"),
-				Address:  os.Getenv("DB_ADDRESS"),
-				Password: os.Getenv("DB_PASSWORD"),
-				Database: os.Getenv("DB_DATABASE"),
+				User:     cfg.UserDev,
+				Address:  cfg.AddressDev,
+				Password: cfg.PasswordDev,
+				Database: cfg.DatabaseDev,
 			}
 			pgDb = ConnectToDB(DbConfig)
 			zap.L().Info("Connection to Development Database.")
 		} else {
-			pgUrl, _ := pg.ParseURL(os.Getenv("DB_ADDRESS_PRODUCTION"))
+			pgUrl, _ := pg.ParseURL(cfg.AddressProd)
 			DbConfig := DbConfig{
-				User:     os.Getenv("DB_USER_PRODUCTION"),
+				User:     cfg.UserProd,
 				Address:  pgUrl.Addr,
-				Password: os.Getenv("DB_PASSWORD_PRODUCTION"),
-				Database: os.Getenv("DB_DATABASE_PRODUCTION"),
+				Password: cfg.PasswordProd,
+				Database: cfg.DatabaseProd,
 			}
 			pgDb = ConnectToDB(DbConfig)
 			zap.L().Info("Connection to Production Database.")
 		}
-		_ = CreateSchema(pgDb)
+		_ = CreateSchema(pgDb, cfg)
 	}
 	return pgDb
 }

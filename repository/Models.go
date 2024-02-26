@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"os"
+	"attendance/bean"
 	"time"
 
 	"github.com/go-pg/pg"
@@ -24,7 +24,7 @@ type Attendance struct {
 	PunchOutDate time.Time `pg:"punch_out_date"`
 }
 
-func CreateSchema(db *pg.DB) error {
+func CreateSchema(db *pg.DB, cfg bean.DBConfig) error {
 
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS "users" (
 		"username" VARCHAR(255) PRIMARY KEY,
@@ -42,7 +42,7 @@ func CreateSchema(db *pg.DB) error {
 		zap.L().Info("Schema created for users")
 	}
 
-	query := `insert into users values ('user','` + os.Getenv("PRINCIPAL_PASSWORD") + `','Principal',1,'ramverma@gmail.com','principal')`
+	query := `insert into users values ('user','` + cfg.PrincipalPassword + `','Principal',1,'ramverma@gmail.com','principal')`
 
 	_, err = db.Exec(query)
 

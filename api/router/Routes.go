@@ -13,7 +13,7 @@ type MuxRouter interface {
 type MUXRouterImpl struct {
 	homeHandler                 restHandler.HomeHandler
 	loginHandler                restHandler.LoginHandler
-	addNewUserHandler           restHandler.AddNewUserHandler
+	addNewUserHandler           restHandler.NewUserHandler
 	punchInOutHandler           restHandler.PunchInOutHandler
 	getTeacherAttendanceHandler restHandler.TeacherAttendanceHandler
 	getClassAttendanceHandler   restHandler.ClassAttendanceHandler
@@ -24,7 +24,7 @@ type MUXRouterImpl struct {
 func NewMUXRouterImpl(
 	homeHandler restHandler.HomeHandler,
 	loginHandler restHandler.LoginHandler,
-	addNewUserHandler restHandler.AddNewUserHandler,
+	addNewUserHandler restHandler.NewUserHandler,
 	punchInOutHandler restHandler.PunchInOutHandler,
 	getTeacherAttendanceHandler restHandler.TeacherAttendanceHandler,
 	getClassAttendanceHandler restHandler.ClassAttendanceHandler,
@@ -39,10 +39,6 @@ func NewMUXRouterImpl(
 		getClassAttendanceHandler:   getClassAttendanceHandler,
 		getStudentAttandance:        getStudentAttandance,
 		fetchStatusHandler:          fetchStatusHandler}
-}
-
-type ServerConfig struct {
-	Port string
 }
 
 func (impl *MUXRouterImpl) NewMUXRouter() *mux.Router {

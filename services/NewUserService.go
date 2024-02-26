@@ -10,19 +10,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type AddNewUserService interface {
+type NewUserService interface {
 	AddNewUser(newUser bean.User, username string) (int, bean.ErrorJSON)
 }
 
-type AddNewUserServiceImpl struct {
+type NewUserServiceImpl struct {
 	repository repository.Repository
 }
 
-func NewAddNewUserServiceImpl(repository repository.Repository) *AddNewUserServiceImpl {
-	return &AddNewUserServiceImpl{repository: repository}
+func NewNewUserServiceImpl(repository repository.Repository) *NewUserServiceImpl {
+	return &NewUserServiceImpl{repository: repository}
 }
 
-func (impl *AddNewUserServiceImpl) AddNewUser(newUser bean.User, username string) (int, bean.ErrorJSON) {
+func (impl *NewUserServiceImpl) AddNewUser(newUser bean.User, username string) (int, bean.ErrorJSON) {
 	util.TrimSpacesFromStruct(&newUser)
 	status, flag, errorJSON := newUser.IsNewUserDataMissing()
 	if flag {

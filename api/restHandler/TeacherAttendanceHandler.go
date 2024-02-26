@@ -17,10 +17,11 @@ type TeacherAttendanceHandler interface {
 
 type TeacherAttendanceImpl struct {
 	teacherAttendance services.TeacherAttendanceService
+	auth              auth.AuthToken
 }
 
-func NewTeacherAttendanceImpl(teacherAttendance services.TeacherAttendanceService) *TeacherAttendanceImpl {
-	return &TeacherAttendanceImpl{teacherAttendance: teacherAttendance}
+func NewTeacherAttendanceImpl(teacherAttendance services.TeacherAttendanceService, auth auth.AuthToken) *TeacherAttendanceImpl {
+	return &TeacherAttendanceImpl{teacherAttendance: teacherAttendance, auth: auth}
 }
 
 func ValidateTeacherRequestData(data bean.GetTeacherAttendanceJSON) (bool, string) {
@@ -38,7 +39,7 @@ func ValidateTeacherRequestData(data bean.GetTeacherAttendanceJSON) (bool, strin
 }
 
 func (impl *TeacherAttendanceImpl) GetTeacherAttendance(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := auth.VerifyToken(r)
+	status, username, _ := impl.auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})

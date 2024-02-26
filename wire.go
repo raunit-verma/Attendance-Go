@@ -17,7 +17,7 @@ import (
 func InitializeApp(*pg.DB) *router.MUXRouterImpl {
 	wire.Build(
 		auth.NewAuthTokenImpl, wire.Bind(new(auth.AuthToken), new(*auth.AuthTokenImpl)),
-		rh.NewAddNewUserImpl, wire.Bind(new(rh.AddNewUserHandler), new(*rh.AddNewUserImpl)),
+		rh.NewNewUserImpl, wire.Bind(new(rh.NewUserHandler), new(*rh.NewUserImpl)),
 		rh.NewFetchStatusImpl, wire.Bind(new(rh.FetchStatusHandler), new(*rh.FetchStatusImpl)),
 		rh.NewClassAttendanceImpl, wire.Bind(new(rh.ClassAttendanceHandler), new(*rh.ClassAttendanceImpl)),
 		rh.NewStudentAttendanceImpl, wire.Bind(new(rh.StudentAttendanceHandler), new(*rh.StudentAttendanceImpl)),
@@ -26,7 +26,7 @@ func InitializeApp(*pg.DB) *router.MUXRouterImpl {
 		rh.NewLoginImpl, wire.Bind(new(rh.LoginHandler), new(*rh.LoginImpl)),
 		rh.NewPunchInOutImpl, wire.Bind(new(rh.PunchInOutHandler), new(*rh.PunchInOutImpl)),
 		repo.NewRepositoryImpl, wire.Bind(new(repo.Repository), new(*repo.RepositoryImpl)),
-		svc.NewAddNewUserServiceImpl, wire.Bind(new(svc.AddNewUserService), new(*svc.AddNewUserServiceImpl)),
+		svc.NewNewUserServiceImpl, wire.Bind(new(svc.NewUserService), new(*svc.NewUserServiceImpl)),
 		svc.NewFetchStatusImpl, wire.Bind(new(svc.FetchStatusService), new(*svc.FetchStatusImpl)),
 		svc.NewClassAttendanceImpl, wire.Bind(new(svc.ClassAttendanceService), new(*svc.ClassAttendanceImpl)),
 		svc.NewStudentAttendanceServiceImpl, wire.Bind(new(svc.StudentAttendanceService), new(*svc.StudentAttendanceServiceImpl)),

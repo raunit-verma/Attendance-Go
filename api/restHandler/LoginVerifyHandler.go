@@ -7,9 +7,9 @@ import (
 	"attendance/util"
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
 
+	"github.com/caarlos0/env/v10"
 	"go.uber.org/zap"
 )
 
@@ -20,15 +20,20 @@ type LoginHandler interface {
 
 type LoginImpl struct {
 	repository repository.Repository
-	authToken  auth.AuthToken
+	auth       auth.AuthToken
+	cfg        bean.CookieConfig
 }
 
-func NewLoginImpl(repository repository.Repository, authToken auth.AuthToken) *LoginImpl {
-	return &LoginImpl{repository: repository, authToken: authToken}
+func NewLoginImpl(repository repository.Repository, auth auth.AuthToken) *LoginImpl {
+	cfg := bean.CookieConfig{}
+	if err := env.Parse(&cfg); err != nil {
+		zap.L().Error("Error loading env.", zap.Error(err))
+	}
+	return &LoginImpl{repository: repository, auth: auth, cfg: cfg}
 }
 
 func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {
-	status, tokenString, username := impl.authToken.CreateToken(r)
+	status, tokenString, username := impl.auth.CreateToken(r)
 
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
@@ -36,7 +41,7 @@ func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if os.Getenv("TYPE") == "Production" {
+	if impl.cfg.Type == "Production" {
 		http.SetCookie(w, &http.Cookie{
 			Name:     "Authorization",
 			Value:    tokenString,
@@ -44,7 +49,7 @@ func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: false,
 			Secure:   true,
 			SameSite: http.SameSiteStrictMode,
-			Domain:   os.Getenv("DOMAIN"),
+			Domain:   impl.cfg.Domain,
 			Path:     "/",
 		})
 	} else {
@@ -69,7 +74,7 @@ func (impl *LoginImpl) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (impl *LoginImpl) VerifyToken(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := auth.VerifyToken(r)
+	status, username, _ := impl.auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})

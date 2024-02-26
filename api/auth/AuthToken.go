@@ -1,30 +1,35 @@
 package auth
 
 import (
+	"attendance/bean"
 	"attendance/repository"
 	"attendance/util"
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
 
+	"github.com/caarlos0/env/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 )
 
 type AuthToken interface {
 	CreateToken(r *http.Request) (int, string, string)
+	VerifyToken(r *http.Request) (int, string, string)
 }
 
 type AuthTokenImpl struct {
 	repository repository.Repository
+	cfg        bean.AuthConfig
 }
 
 func NewAuthTokenImpl(repository repository.Repository) *AuthTokenImpl {
-	return &AuthTokenImpl{repository: repository}
+	cfg := bean.AuthConfig{}
+	if err := env.Parse(&cfg); err != nil {
+		zap.L().Error("Error loading env.", zap.Error(err))
+	}
+	return &AuthTokenImpl{repository: repository, cfg: cfg}
 }
-
-var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 type Claims struct {
 	Username string `json:"username"`
@@ -74,7 +79,7 @@ func (impl *AuthTokenImpl) CreateToken(r *http.Request) (int, string, string) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString([]byte(impl.cfg.JwtKey))
 
 	if err != nil {
 		zap.L().Error("Couldn't create token string", zap.Error(err))
@@ -84,7 +89,7 @@ func (impl *AuthTokenImpl) CreateToken(r *http.Request) (int, string, string) {
 	return http.StatusAccepted, tokenString, user.Username
 }
 
-func VerifyToken(r *http.Request) (int, string, string) {
+func (impl *AuthTokenImpl) VerifyToken(r *http.Request) (int, string, string) {
 	cookie, err := r.Cookie("Authorization")
 
 	if err != nil {
@@ -100,7 +105,7 @@ func VerifyToken(r *http.Request) (int, string, string) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
+		return []byte(impl.cfg.JwtKey), nil
 	})
 
 	if err != nil {

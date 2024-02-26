@@ -17,10 +17,11 @@ type HomeHandler interface {
 
 type HomeImpl struct {
 	homeService services.HomeService
+	auth        auth.AuthToken
 }
 
-func NewHomeImpl(homeService services.HomeService) *HomeImpl {
-	return &HomeImpl{homeService: homeService}
+func NewHomeImpl(homeService services.HomeService, auth auth.AuthToken) *HomeImpl {
+	return &HomeImpl{homeService: homeService, auth: auth}
 }
 
 func ValidateRequestData(data bean.GetHomeJSON) (bool, string) {
@@ -35,7 +36,7 @@ func ValidateRequestData(data bean.GetHomeJSON) (bool, string) {
 }
 
 func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
-	status, username, role := auth.VerifyToken(r)
+	status, username, role := impl.auth.VerifyToken(r)
 
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)

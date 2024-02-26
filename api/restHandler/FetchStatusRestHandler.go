@@ -15,14 +15,15 @@ type FetchStatusHandler interface {
 
 type FetchStatusImpl struct {
 	fetchStatusService services.FetchStatusService
+	auth               auth.AuthToken
 }
 
-func NewFetchStatusImpl(fetchStatusService services.FetchStatusService) *FetchStatusImpl {
-	return &FetchStatusImpl{fetchStatusService: fetchStatusService}
+func NewFetchStatusImpl(fetchStatusService services.FetchStatusService, auth auth.AuthToken) *FetchStatusImpl {
+	return &FetchStatusImpl{fetchStatusService: fetchStatusService, auth: auth}
 }
 
 func (impl *FetchStatusImpl) FetchStatus(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := auth.VerifyToken(r)
+	status, username, _ := impl.auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})

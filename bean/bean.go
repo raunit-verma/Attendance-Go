@@ -8,6 +8,33 @@ import (
 	"go.uber.org/zap"
 )
 
+type DBConfig struct {
+	UserDev           string `env:"DB_USER"`
+	AddressDev        string `env:"DB_ADDRESS"`
+	PasswordDev       string `env:"DB_PASSWORD"`
+	DatabaseDev       string `env:"DB_DATABASE"`
+	UserProd          string `env:"DB_USER_PRODUCTION"`
+	AddressProd       string `env:"DB_ADDRESS_PRODUCTION"`
+	PasswordProd      string `env:"DB_PASSWORD_PRODUCTION"`
+	DatabaseProd      string `env:"DB_DATABASE_PRODUCTION"`
+	PrincipalPassword string `env:"PRINCIPAL_PASSWORD"`
+	Type              string `env:"TYPE"`
+}
+
+type AuthConfig struct {
+	JwtKey string `env:"JWT_KEY"`
+}
+
+type MainConfig struct {
+	Port string `env:"PORT"`
+	Url  string `env:"URL"`
+}
+
+type CookieConfig struct {
+	Domain string `env:"DOMAIN"`
+	Type   string `env:"TYPE"`
+}
+
 type User struct {
 	Username string `json:"username"`
 	Password string `json:"password,omitempty"`

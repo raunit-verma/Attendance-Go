@@ -1,11 +1,11 @@
 package main
 
 import (
-	"attendance/api/router"
+	"attendance/bean"
 	"attendance/repository"
 	"net/http"
-	"os"
 
+	"github.com/caarlos0/env"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"go.uber.org/zap"
@@ -22,9 +22,12 @@ func main() {
 		zap.L().Error("Error loading Env", zap.Error(err))
 	}
 
-	serverConfig := router.ServerConfig{
-		Port: os.Getenv("PORT"),
+	cfg := bean.MainConfig{}
+
+	if err := env.Parse(&cfg); err != nil {
+		zap.L().Error("Error loading env.", zap.Error(err))
 	}
+
 	db := repository.GetDB()
 	defer db.Close()
 
@@ -32,7 +35,7 @@ func main() {
 
 	r := wire.NewMUXRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{os.Getenv("URL")},
+		AllowedOrigins:   []string{cfg.Url},
 		AllowCredentials: true,
 		AllowedMethods:   []string{"GET", "POST"},
 	})
@@ -41,9 +44,9 @@ func main() {
 
 	defer zap.L().Sync()
 
-	zap.L().Info(`Server starting on Port ` + serverConfig.Port)
+	zap.L().Info(`Server starting on Port ` + cfg.Port)
 
-	if err := http.ListenAndServe(":"+serverConfig.Port, handler); err != nil {
-		zap.L().Fatal("HTTP server failed to start at Port "+serverConfig.Port, zap.Error((err)))
+	if err := http.ListenAndServe(":"+cfg.Port, handler); err != nil {
+		zap.L().Fatal("HTTP server failed to start at Port "+cfg.Port, zap.Error((err)))
 	}
 }

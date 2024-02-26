@@ -3,6 +3,8 @@ module attendance
 go 1.21.5
 
 require (
+	github.com/caarlos0/env v3.5.0+incompatible // indirect
+	github.com/caarlos0/env/v10 v10.0.0 // indirect
 	github.com/go-pg/pg v8.0.7+incompatible // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.0 // indirect
 	github.com/google/subcommands v1.2.0 // indirect

@@ -11,20 +11,21 @@ import (
 	"go.uber.org/zap"
 )
 
-type AddNewUserHandler interface {
+type NewUserHandler interface {
 	AddNewUser(w http.ResponseWriter, r *http.Request)
 }
 
-type AddNewUserImpl struct {
-	addNewUserService services.AddNewUserService
+type NewUserImpl struct {
+	newUserService services.NewUserService
+	auth           auth.AuthToken
 }
 
-func NewAddNewUserImpl(addNewUserService services.AddNewUserService) *AddNewUserImpl {
-	return &AddNewUserImpl{addNewUserService: addNewUserService}
+func NewNewUserImpl(newUserService services.NewUserService, auth auth.AuthToken) *NewUserImpl {
+	return &NewUserImpl{newUserService: newUserService, auth: auth}
 }
 
-func (impl *AddNewUserImpl) AddNewUser(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := auth.VerifyToken(r)
+func (impl *NewUserImpl) AddNewUser(w http.ResponseWriter, r *http.Request) {
+	status, username, _ := impl.auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(bean.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One})
@@ -40,8 +41,7 @@ func (impl *AddNewUserImpl) AddNewUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bean.ErrorJSON{ErrorCode: 2, Message: util.CannotDecodePayload_Two})
 		return
 	}
-
-	status, errorJSON := impl.addNewUserService.AddNewUser(newUser, username)
+	status, errorJSON := impl.newUserService.AddNewUser(newUser, username)
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(errorJSON)
 }

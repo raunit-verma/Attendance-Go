@@ -17,10 +17,11 @@ type ClassAttendanceHandler interface {
 
 type ClassAttendanceImpl struct {
 	classAttendance services.ClassAttendanceService
+	auth            auth.AuthToken
 }
 
-func NewClassAttendanceImpl(classAttendance services.ClassAttendanceService) *ClassAttendanceImpl {
-	return &ClassAttendanceImpl{classAttendance: classAttendance}
+func NewClassAttendanceImpl(classAttendance services.ClassAttendanceService, auth auth.AuthToken) *ClassAttendanceImpl {
+	return &ClassAttendanceImpl{classAttendance: classAttendance, auth: auth}
 }
 
 func ValidateClassRequestData(data bean.GetClassAttendanceJSON) (bool, string) {
@@ -41,7 +42,7 @@ func ValidateClassRequestData(data bean.GetClassAttendanceJSON) (bool, string) {
 }
 
 func (impl *ClassAttendanceImpl) GetClassAttendance(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := auth.VerifyToken(r)
+	status, username, _ := impl.auth.VerifyToken(r)
 	if status != http.StatusAccepted {
 		zap.L().Error("User not verified", zap.String("Code", "1"))
 		w.WriteHeader(status)
