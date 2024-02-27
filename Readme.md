@@ -1,5 +1,5 @@
 # **Attendance Management System (AMS) - GoLang**
-This is an **Attendance Management System (AMS) **written in **GoLang**. It is a backend system responsible for managing attendance records. This project utilizes various third-party modules for different functionalities.
+This is an **Attendance Management System (AMS)** written in **GoLang**. It is a backend system responsible for managing attendance records. This project utilizes various third-party modules for different functionalities.
 
 #### **Modules Used**
 - github.com/caarlos0/env
@@ -51,7 +51,7 @@ URL=http://localhost:3000
 DOMAIN=localhost
 JWT_KEY=Devtron@Raunit
 
-PRINCIPAL_PASSWORD=
+PRINCIPAL_PASSWORD= # Do not use plain password, use hased password using bcrypt
 ```
 Download all modules:
 ```bash
