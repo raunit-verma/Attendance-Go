@@ -15,7 +15,7 @@ func init() {
 	zap.ReplaceGlobals(zap.Must(zap.NewProduction()))
 }
 
-func main() {
+func main() {	
 	err := godotenv.Load()
 
 	if err != nil {
