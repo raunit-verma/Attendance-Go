@@ -64,10 +64,10 @@ func (impl *MUXRouterImpl) NewMUXRouter() *mux.Router {
 	r.HandleFunc("/teacher/attendance", impl.getTeacherAttendanceHandler.GetTeacherAttendance).Methods("POST")
 
 	// Route to get class attendance for day, month and year
-	r.HandleFunc("/getclassattendance", impl.getClassAttendanceHandler.GetClassAttendance).Methods("POST")
+	r.HandleFunc("/class/attendance", impl.getClassAttendanceHandler.GetClassAttendance).Methods("POST")
 
 	// Route to get particular student attendance for month and year
-	r.HandleFunc("/getstudentattendance", impl.getStudentAttandance.GetStudentAttendance).Methods("POST")
+	r.HandleFunc("/student/attendance", impl.getStudentAttandance.GetStudentAttendance).Methods("POST")
 
 	// Route to get currentStatus of any user
 	r.HandleFunc("/fetchstatus", impl.fetchStatusHandler.FetchStatus).Methods("Get")
