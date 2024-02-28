@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/context"
 	"go.uber.org/zap"
 )
 
@@ -25,13 +26,8 @@ func NewHomeImpl(homeService services.HomeService, auth auth.AuthService) *HomeI
 }
 
 func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
-	status, username, role := impl.auth.VerifyToken(r)
-
-	if status != http.StatusAccepted {
-		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
-		return
-	}
+	username := context.Get(r, "username").(string)
+	role := context.Get(r, "role").(string)
 
 	newHomeRequest := bean.GetHomeJSON{}
 	err := json.NewDecoder(r.Body).Decode(&newHomeRequest)

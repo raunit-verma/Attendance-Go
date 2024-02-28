@@ -2,6 +2,7 @@ package router
 
 import (
 	"attendance/api/restHandler"
+	"attendance/middleware"
 
 	"github.com/gorilla/mux"
 )
@@ -45,13 +46,14 @@ func (impl *MUXRouterImpl) NewMUXRouter() *mux.Router {
 	// creating a new mux router
 
 	r := mux.NewRouter()
+	r.Use(middleware.AuthMiddleware)
+
+	// Route for accepting username and password
+	r.HandleFunc("/login", impl.loginHandler.Login).Methods("POST")
 
 	// all the routes are defined here
 	// home route to display all stats
 	r.HandleFunc("/home", impl.homeHandler.Home).Methods("POST")
-
-	// Route for accepting username and password
-	r.HandleFunc("/login", impl.loginHandler.Login).Methods("POST")
 
 	// Route for adding new users
 	r.HandleFunc("/user", impl.addNewUserHandler.AddNewUser).Methods("POST")

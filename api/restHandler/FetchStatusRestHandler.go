@@ -2,11 +2,11 @@ package restHandler
 
 import (
 	auth "attendance/api/auth"
-	"attendance/bean"
 	"attendance/services"
-	"attendance/util"
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/context"
 )
 
 type FetchStatusHandler interface {
@@ -23,12 +23,7 @@ func NewFetchStatusImpl(fetchStatusService services.FetchStatusService, authServ
 }
 
 func (impl *FetchStatusImpl) FetchStatus(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := impl.authService.VerifyToken(r)
-	if status != http.StatusAccepted {
-		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
-		return
-	}
+	username := context.Get(r, "username").(string)
 	student_status := impl.fetchStatusService.FetchStatus(username)
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(student_status)

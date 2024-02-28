@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/context"
 	"go.uber.org/zap"
 )
 
@@ -25,12 +26,7 @@ func NewTeacherAttendanceImpl(teacherAttendance services.TeacherAttendanceServic
 }
 
 func (impl *TeacherAttendanceImpl) GetTeacherAttendance(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := impl.authService.VerifyToken(r)
-	if status != http.StatusAccepted {
-		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
-		return
-	}
+	username := context.Get(r, "username").(string)
 
 	newTeacherAttendanceRequest := bean.GetTeacherAttendanceJSON{}
 	err := json.NewDecoder(r.Body).Decode(&newTeacherAttendanceRequest)

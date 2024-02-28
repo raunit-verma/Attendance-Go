@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/context"
 	"go.uber.org/zap"
 )
 
@@ -25,12 +26,7 @@ func NewNewUserImpl(newUserService services.NewUserService, auth auth.AuthServic
 }
 
 func (impl *NewUserImpl) AddNewUser(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := impl.authService.VerifyToken(r)
-	if status != http.StatusAccepted {
-		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(bean.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One})
-		return
-	}
+	username := context.Get(r, "username").(string)
 
 	newUser := bean.User{}
 

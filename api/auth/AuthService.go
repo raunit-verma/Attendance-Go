@@ -15,7 +15,6 @@ import (
 
 type AuthService interface {
 	CreateToken(r *http.Request) (int, string, string)
-	VerifyToken(r *http.Request) (int, string, string)
 }
 
 type AuthServiceImpl struct {
@@ -64,35 +63,4 @@ func (impl *AuthServiceImpl) CreateToken(r *http.Request) (int, string, string) 
 	}
 
 	return http.StatusAccepted, tokenString, user.Username
-}
-
-func (impl *AuthServiceImpl) VerifyToken(r *http.Request) (int, string, string) {
-	cookie, err := r.Cookie("Authorization")
-
-	if err != nil {
-		zap.L().Error("No Cookie found", zap.Error(err))
-		return http.StatusUnauthorized, "", ""
-	}
-
-	tokenStr := cookie.Value
-	claims := bean.Claims{}
-
-	token, err := jwt.ParseWithClaims(tokenStr, &claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(impl.cfg.JwtKey), nil
-	})
-
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			zap.L().Error("Invalid token", zap.Error(err))
-			return http.StatusUnauthorized, "", ""
-		}
-		zap.L().Error("Error verifying token", zap.Error(err))
-		return http.StatusForbidden, "", ""
-	}
-
-	if !token.Valid {
-		zap.L().Error("Token not valid")
-		return http.StatusUnauthorized, "", ""
-	}
-	return http.StatusAccepted, claims.Username, claims.Role
 }
