@@ -16,15 +16,15 @@ type PunchInOutHandler interface {
 
 type PunchInOutImpl struct {
 	punchInOutService services.PunchInOutService
-	auth              auth.AuthToken
+	authService       auth.AuthService
 }
 
-func NewPunchInOutImpl(punchInOutService services.PunchInOutService, auth auth.AuthToken) *PunchInOutImpl {
-	return &PunchInOutImpl{punchInOutService: punchInOutService, auth: auth}
+func NewPunchInOutImpl(punchInOutService services.PunchInOutService, auth auth.AuthService) *PunchInOutImpl {
+	return &PunchInOutImpl{punchInOutService: punchInOutService, authService: auth}
 }
 
 func (impl *PunchInOutImpl) PunchIn(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := impl.auth.VerifyToken(r)
+	status, username, _ := impl.authService.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})
@@ -36,7 +36,7 @@ func (impl *PunchInOutImpl) PunchIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (impl *PunchInOutImpl) PunchOut(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := impl.auth.VerifyToken(r)
+	status, username, _ := impl.authService.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})

@@ -53,18 +53,15 @@ func (impl *MUXRouterImpl) NewMUXRouter() *mux.Router {
 	// Route for accepting username and password
 	r.HandleFunc("/login", impl.loginHandler.Login).Methods("POST")
 
-	// Route to verify token
-	r.HandleFunc("/verify", impl.loginHandler.VerifyToken).Methods("GET")
-
 	// Route for adding new users
-	r.HandleFunc("/addnewuser", impl.addNewUserHandler.AddNewUser).Methods("POST")
+	r.HandleFunc("/user", impl.addNewUserHandler.AddNewUser).Methods("POST")
 
 	// Route for Punch-in and Punch-out
-	r.HandleFunc("/punchin", impl.punchInOutHandler.PunchIn).Methods("GET")
-	r.HandleFunc("/punchout", impl.punchInOutHandler.PunchOut).Methods("GET")
+	r.HandleFunc("/punch/in", impl.punchInOutHandler.PunchIn).Methods("GET")
+	r.HandleFunc("/punch/out", impl.punchInOutHandler.PunchOut).Methods("GET")
 
 	// Route for Teacher attendence for particular month accessible by Principal and Teacher
-	r.HandleFunc("/getteacherattendance", impl.getTeacherAttendanceHandler.GetTeacherAttendance).Methods("POST")
+	r.HandleFunc("/teacher/attendance", impl.getTeacherAttendanceHandler.GetTeacherAttendance).Methods("POST")
 
 	// Route to get class attendance for day, month and year
 	r.HandleFunc("/getclassattendance", impl.getClassAttendanceHandler.GetClassAttendance).Methods("POST")

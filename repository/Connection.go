@@ -1,19 +1,14 @@
 package repository
 
 import (
+	"attendance/adapter"
 	"attendance/bean"
+	"attendance/util"
 
 	"github.com/caarlos0/env"
 	"github.com/go-pg/pg"
 	"go.uber.org/zap"
 )
-
-type DbConfig struct {
-	User     string
-	Password string
-	Address  string
-	Database string
-}
 
 var pgDb *pg.DB = nil
 
@@ -25,24 +20,12 @@ func GetDB() *pg.DB {
 	}
 
 	if pgDb == nil {
-		if cfg.Type == "Development" {
-			DbConfig := DbConfig{
-				User:     cfg.UserDev,
-				Address:  cfg.AddressDev,
-				Password: cfg.PasswordDev,
-				Database: cfg.DatabaseDev,
-			}
-			pgDb = ConnectToDB(DbConfig)
+		if cfg.Type == util.DEVELOPMENT {
+			pgDb = ConnectToDB(adapter.SetDBDev(&cfg))
 			zap.L().Info("Connection to Development Database.")
 		} else {
 			pgUrl, _ := pg.ParseURL(cfg.AddressProd)
-			DbConfig := DbConfig{
-				User:     cfg.UserProd,
-				Address:  pgUrl.Addr,
-				Password: cfg.PasswordProd,
-				Database: cfg.DatabaseProd,
-			}
-			pgDb = ConnectToDB(DbConfig)
+			pgDb = ConnectToDB(adapter.SetDBProd(&cfg, pgUrl.Addr))
 			zap.L().Info("Connection to Production Database.")
 		}
 		_ = CreateSchema(pgDb, cfg)
@@ -50,16 +33,9 @@ func GetDB() *pg.DB {
 	return pgDb
 }
 
-func ConnectToDB(dbConfig DbConfig) *pg.DB {
+func ConnectToDB(dbConfig bean.DbDetails) *pg.DB {
 
-	opts := &pg.Options{
-		User:     dbConfig.User,
-		Password: dbConfig.Password,
-		Addr:     dbConfig.Address,
-		Database: dbConfig.Database,
-	}
-
-	db := pg.Connect(opts)
+	db := pg.Connect(adapter.GetPgOptions(dbConfig))
 
 	if db == nil {
 		zap.L().Fatal("Database connection failed")

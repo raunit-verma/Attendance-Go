@@ -17,22 +17,11 @@ type HomeHandler interface {
 
 type HomeImpl struct {
 	homeService services.HomeService
-	auth        auth.AuthToken
+	auth        auth.AuthService
 }
 
-func NewHomeImpl(homeService services.HomeService, auth auth.AuthToken) *HomeImpl {
+func NewHomeImpl(homeService services.HomeService, auth auth.AuthService) *HomeImpl {
 	return &HomeImpl{homeService: homeService, auth: auth}
-}
-
-func ValidateRequestData(data bean.GetHomeJSON) (bool, string) {
-	if data.Month <= 0 || data.Month > 12 {
-		zap.L().Info("Requested month is not valid")
-		return true, "Month is not valid. "
-	} else if data.Year <= 2020 || data.Year >= 2100 {
-		zap.L().Info("Request year is not valid")
-		return true, "Year is not valid. "
-	}
-	return false, ""
 }
 
 func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +43,7 @@ func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	flag, message := ValidateRequestData(newHomeRequest)
+	flag, message := ValidateHomeRequestData(newHomeRequest)
 
 	if flag {
 		zap.L().Info("Home request data validation failed.")
@@ -62,14 +51,14 @@ func (impl *HomeImpl) Home(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: message + util.RequestDataValidation_Five, ErrorCode: 5})
 		return
 	}
-	if role == "student" {
-		data := impl.homeService.StudentDashboardService(username, newHomeRequest)
+	if role == util.STUDENT {
+		data := impl.homeService.StudentDashboard(username, newHomeRequest)
 		json.NewEncoder(w).Encode(data)
-	} else if role == "teacher" {
-		data := impl.homeService.TeacherDashboardService(username, newHomeRequest)
+	} else if role == util.TEACHER {
+		data := impl.homeService.TeacherDashboard(username, newHomeRequest)
 		json.NewEncoder(w).Encode(data)
-	} else if role == "principal" {
-		data, errorJSON := impl.homeService.PrincipalDashboardService(newHomeRequest)
+	} else if role == util.PRINCIPAL {
+		data, errorJSON := impl.homeService.PrincipalDashboard(newHomeRequest)
 		if data != nil {
 			json.NewEncoder(w).Encode(data)
 		} else {

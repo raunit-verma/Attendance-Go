@@ -17,22 +17,11 @@ type StudentAttendanceHandler interface {
 
 type StudentAttendanceImpl struct {
 	studentAttendance services.StudentAttendanceService
-	auth              auth.AuthToken
+	auth              auth.AuthService
 }
 
-func NewStudentAttendanceImpl(studentAttendance services.StudentAttendanceService, auth auth.AuthToken) *StudentAttendanceImpl {
+func NewStudentAttendanceImpl(studentAttendance services.StudentAttendanceService, auth auth.AuthService) *StudentAttendanceImpl {
 	return &StudentAttendanceImpl{studentAttendance: studentAttendance, auth: auth}
-}
-
-func ValidateStudentRequestData(data bean.GetStudentAttendanceJSON) (bool, string) {
-	if data.Month <= 0 || data.Month > 12 {
-		zap.L().Info("Requested month is not valid")
-		return true, "Month is not valid. "
-	} else if data.Year <= 2020 || data.Year >= 2100 {
-		zap.L().Info("Request year is not valid")
-		return true, "Year is not valid. "
-	}
-	return false, ""
 }
 
 func (impl *StudentAttendanceImpl) GetStudentAttendance(w http.ResponseWriter, r *http.Request) {

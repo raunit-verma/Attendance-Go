@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -24,9 +25,10 @@ func NewPunchInOutServiceImpl(repository repository.Repository) *PunchInOutServi
 }
 
 func (impl *PunchInOutServiceImpl) PunchIn(username string) (int, bean.ErrorJSON) {
-	user := impl.repository.GetUser(username)
+	user, err := impl.repository.GetUser(username)
 	if user == nil {
 		zap.L().Error("User not authorized.", zap.String("Username", username))
+		zap.L().Error(err.Error())
 		return http.StatusUnauthorized, bean.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One}
 	}
 
@@ -42,7 +44,12 @@ func (impl *PunchInOutServiceImpl) PunchIn(username string) (int, bean.ErrorJSON
 
 	_, currentTime := util.FormateDateTime(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 
-	err := impl.repository.AddNewPunchIn(user.Username, currentTime)
+	attendance := repository.Attendance{
+		AttendanceID: uuid.New().String(),
+		PunchInDate:  currentTime,
+		Username:     username,
+	}
+	err = impl.repository.AddNewPunchIn(attendance)
 	if err != nil {
 		zap.L().Error("Error doing operation on DB.", zap.Error(err))
 		return http.StatusInternalServerError, bean.ErrorJSON{Message: util.DBError_Seven, ErrorCode: 7}
@@ -51,7 +58,7 @@ func (impl *PunchInOutServiceImpl) PunchIn(username string) (int, bean.ErrorJSON
 }
 
 func (impl *PunchInOutServiceImpl) PunchOut(username string) (int, bean.ErrorJSON) {
-	user := impl.repository.GetUser(username)
+	user, _ := impl.repository.GetUser(username)
 	if user == nil {
 		zap.L().Error("User not authorized.", zap.String("Username", username))
 

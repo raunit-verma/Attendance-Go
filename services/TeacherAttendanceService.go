@@ -6,6 +6,8 @@ import (
 	"attendance/util"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type TeacherAttendanceService interface {
@@ -21,8 +23,10 @@ func NewTeacherAttendanceServiceImpl(repository repository.Repository) *TeacherA
 }
 
 func (impl *TeacherAttendanceServiceImpl) GetTeacherAttendance(username string, teacherId string, data bean.GetTeacherAttendanceJSON) (int, bean.ErrorJSON, []repository.Attendance) {
-	user := impl.repository.GetUser(username)
-
+	user, err := impl.repository.GetUser(username)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
 	if user == nil || (user.Role != "principal" && user.Role != "teacher") {
 		return http.StatusUnauthorized, bean.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One}, nil
 	}

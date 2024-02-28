@@ -22,8 +22,10 @@ func NewStudentAttendanceServiceImpl(repository repository.Repository) *StudentA
 }
 
 func (impl *StudentAttendanceServiceImpl) GetStudentAttendance(username string, data bean.GetStudentAttendanceJSON) (bool, []repository.Attendance) {
-	user := impl.repository.GetUser(username)
-
+	user, err := impl.repository.GetUser(username)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
 	if user != nil && user.Role != "student" {
 		zap.L().Info("Not authorized to get student attendance details")
 		return false, nil

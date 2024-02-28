@@ -23,8 +23,10 @@ func NewClassAttendanceImpl(repository repository.Repository) *ClassAttendanceIm
 }
 
 func (impl *ClassAttendanceImpl) GetClassAttendance(username string, data bean.GetClassAttendanceJSON) (int, bean.ErrorJSON, []bean.StudentAttendanceJSON) {
-	user := impl.repository.GetUser(username)
-
+	user, err := impl.repository.GetUser(username)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
 	if user != nil && user.Role != "teacher" {
 		zap.L().Info("Not authorized to get student attendance details")
 		return http.StatusUnauthorized, bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1}, nil

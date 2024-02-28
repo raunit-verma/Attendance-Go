@@ -2,9 +2,9 @@ package bean
 
 import (
 	"attendance/util"
-	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 )
 
@@ -42,6 +42,20 @@ type User struct {
 	Class    int    `json:"class"`
 	Email    string `json:"email,omitempty"`
 	Role     string `json:"role"`
+}
+
+type Claims struct {
+	Username string `json:"username"`
+	FullName string `json:"fullname"`
+	Class    int    `json:"class"`
+	Email    string `json:"email,omitempty"`
+	Role     string `json:"role"`
+	jwt.RegisteredClaims
+}
+
+type Credentials struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 type AttendanceJSON struct {
@@ -91,7 +105,14 @@ type DashboardJSON struct {
 	Second            int    `json:"second"`
 }
 
-func (newUser User) IsNewUserDataMissing() (int, bool, ErrorJSON) {
+type DbDetails struct {
+	User     string
+	Password string
+	Address  string
+	Database string
+}
+
+func IsNewUserDataMissing(newUser User) (bool, ErrorJSON) {
 	IsDataMissing := false
 	Message := ""
 
@@ -122,8 +143,8 @@ func (newUser User) IsNewUserDataMissing() (int, bool, ErrorJSON) {
 	}
 
 	if IsDataMissing {
-		return http.StatusBadRequest, IsDataMissing, ErrorJSON{ErrorCode: 3, Message: Message + util.UserDataMissing_Three}
+		return IsDataMissing, ErrorJSON{ErrorCode: 3, Message: Message + util.UserDataMissing_Three}
 	}
 
-	return http.StatusAccepted, IsDataMissing, ErrorJSON{}
+	return IsDataMissing, ErrorJSON{}
 }

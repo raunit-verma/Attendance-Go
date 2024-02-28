@@ -27,12 +27,12 @@ type Attendance struct {
 func CreateSchema(db *pg.DB, cfg bean.DBConfig) error {
 
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS "users" (
-		"username" VARCHAR(255) PRIMARY KEY,
-		"password" VARCHAR(255),
-		"full_name" VARCHAR(255),
+		"username" VARCHAR(50) PRIMARY KEY,
+		"password" VARCHAR(50),
+		"full_name" VARCHAR(50),
 		"class" INTEGER,
-		"email" VARCHAR(255),
-		"role" VARCHAR(255)
+		"email" VARCHAR(50),
+		"role" VARCHAR(12)
 	  );`)
 
 	if err != nil {
@@ -57,7 +57,7 @@ func CreateSchema(db *pg.DB, cfg bean.DBConfig) error {
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS "attendances" (
-		"username" VARCHAR(255),
+		"username" VARCHAR(50),
 		"attendance_id" VARCHAR(255) PRIMARY KEY,
 		"punch_in_date" TIMESTAMP,
 		"punch_out_date" TIMESTAMP

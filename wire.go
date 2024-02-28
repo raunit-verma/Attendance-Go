@@ -16,7 +16,7 @@ import (
 
 func InitializeApp(*pg.DB) *router.MUXRouterImpl {
 	wire.Build(
-		auth.NewAuthTokenImpl, wire.Bind(new(auth.AuthToken), new(*auth.AuthTokenImpl)),
+		auth.NewAuthServiceImpl, wire.Bind(new(auth.AuthService), new(*auth.AuthServiceImpl)),
 		rh.NewNewUserImpl, wire.Bind(new(rh.NewUserHandler), new(*rh.NewUserImpl)),
 		rh.NewFetchStatusImpl, wire.Bind(new(rh.FetchStatusHandler), new(*rh.FetchStatusImpl)),
 		rh.NewClassAttendanceImpl, wire.Bind(new(rh.ClassAttendanceHandler), new(*rh.ClassAttendanceImpl)),

@@ -24,10 +24,10 @@ func NewNewUserServiceImpl(repository repository.Repository) *NewUserServiceImpl
 
 func (impl *NewUserServiceImpl) AddNewUser(newUser bean.User, username string) (int, bean.ErrorJSON) {
 	util.TrimSpacesFromStruct(&newUser)
-	status, flag, errorJSON := newUser.IsNewUserDataMissing()
+	flag, errorJSON := bean.IsNewUserDataMissing(newUser)
 	if flag {
 		zap.L().Error("New user data is missing")
-		return status, errorJSON
+		return http.StatusBadRequest, errorJSON
 	}
 
 	flag, message := util.IsStrongPassword(newUser.Password)
@@ -36,8 +36,10 @@ func (impl *NewUserServiceImpl) AddNewUser(newUser bean.User, username string) (
 		return http.StatusBadRequest, bean.ErrorJSON{Message: util.PasswordNotStrong_Ten + message, ErrorCode: 10}
 	}
 
-	user := impl.repository.GetUser(username)
-
+	user, err := impl.repository.GetUser(username)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
 	if user != nil && user.Role != "principal" {
 		zap.L().Warn("Unauthorized to add new user")
 		return http.StatusUnauthorized, bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1}

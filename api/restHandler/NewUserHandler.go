@@ -17,15 +17,15 @@ type NewUserHandler interface {
 
 type NewUserImpl struct {
 	newUserService services.NewUserService
-	auth           auth.AuthToken
+	authService    auth.AuthService
 }
 
-func NewNewUserImpl(newUserService services.NewUserService, auth auth.AuthToken) *NewUserImpl {
-	return &NewUserImpl{newUserService: newUserService, auth: auth}
+func NewNewUserImpl(newUserService services.NewUserService, auth auth.AuthService) *NewUserImpl {
+	return &NewUserImpl{newUserService: newUserService, authService: auth}
 }
 
 func (impl *NewUserImpl) AddNewUser(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := impl.auth.VerifyToken(r)
+	status, username, _ := impl.authService.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(bean.ErrorJSON{ErrorCode: 1, Message: util.NotAuthorized_One})

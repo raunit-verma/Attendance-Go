@@ -15,7 +15,7 @@ func init() {
 	zap.ReplaceGlobals(zap.Must(zap.NewProduction()))
 }
 
-func main() {	
+func main() {
 	err := godotenv.Load()
 
 	if err != nil {
@@ -31,9 +31,9 @@ func main() {
 	db := repository.GetDB()
 	defer db.Close()
 
-	wire := InitializeApp(db)
+	app := InitializeApp(db)
 
-	r := wire.NewMUXRouter()
+	r := app.NewMUXRouter()
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{cfg.Url},
 		AllowCredentials: true,

@@ -17,29 +17,15 @@ type TeacherAttendanceHandler interface {
 
 type TeacherAttendanceImpl struct {
 	teacherAttendance services.TeacherAttendanceService
-	auth              auth.AuthToken
+	authService       auth.AuthService
 }
 
-func NewTeacherAttendanceImpl(teacherAttendance services.TeacherAttendanceService, auth auth.AuthToken) *TeacherAttendanceImpl {
-	return &TeacherAttendanceImpl{teacherAttendance: teacherAttendance, auth: auth}
-}
-
-func ValidateTeacherRequestData(data bean.GetTeacherAttendanceJSON) (bool, string) {
-	if data.ID == "" {
-		zap.L().Info("Teacher id is null")
-		return true, "Teacher id is null. "
-	} else if data.Month <= 0 || data.Month > 12 {
-		zap.L().Info("Month is not valid")
-		return true, "Month is not valid. "
-	} else if data.Year < 2020 || data.Year >= 2100 {
-		zap.L().Info("Year is not valid")
-		return true, "Year is not valid. "
-	}
-	return false, ""
+func NewTeacherAttendanceImpl(teacherAttendance services.TeacherAttendanceService, auth auth.AuthService) *TeacherAttendanceImpl {
+	return &TeacherAttendanceImpl{teacherAttendance: teacherAttendance, authService: auth}
 }
 
 func (impl *TeacherAttendanceImpl) GetTeacherAttendance(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := impl.auth.VerifyToken(r)
+	status, username, _ := impl.authService.VerifyToken(r)
 	if status != http.StatusAccepted {
 		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(bean.ErrorJSON{Message: util.NotAuthorized_One, ErrorCode: 1})

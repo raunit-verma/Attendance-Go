@@ -8,9 +8,9 @@ import (
 )
 
 type HomeService interface {
-	TeacherDashboardService(username string, requestData bean.GetHomeJSON) bean.DashboardJSON
-	StudentDashboardService(username string, requestData bean.GetHomeJSON) bean.DashboardJSON
-	PrincipalDashboardService(requestData bean.GetHomeJSON) (map[string]int, bean.ErrorJSON)
+	TeacherDashboard(username string, requestData bean.GetHomeJSON) bean.DashboardJSON
+	StudentDashboard(username string, requestData bean.GetHomeJSON) bean.DashboardJSON
+	PrincipalDashboard(requestData bean.GetHomeJSON) (map[string]int, bean.ErrorJSON)
 }
 
 type HomeServiceImpl struct {
@@ -34,7 +34,7 @@ func getMonthlyAttendance(allAttendance []repository.Attendance) ([32]bool, time
 	return monthlyAttendance, duration
 }
 
-func (impl *HomeServiceImpl) TeacherDashboardService(username string, requestData bean.GetHomeJSON) bean.DashboardJSON {
+func (impl *HomeServiceImpl) TeacherDashboard(username string, requestData bean.GetHomeJSON) bean.DashboardJSON {
 	data := bean.GetTeacherAttendanceJSON{ID: username, Month: requestData.Month, Year: requestData.Year}
 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
@@ -45,7 +45,7 @@ func (impl *HomeServiceImpl) TeacherDashboardService(username string, requestDat
 	return bean.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
 }
 
-func (impl *HomeServiceImpl) StudentDashboardService(username string, requestData bean.GetHomeJSON) bean.DashboardJSON {
+func (impl *HomeServiceImpl) StudentDashboard(username string, requestData bean.GetHomeJSON) bean.DashboardJSON {
 	data := bean.GetStudentAttendanceJSON{Month: requestData.Month, Year: requestData.Year}
 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), 1, 0, 0, 0)
@@ -56,7 +56,7 @@ func (impl *HomeServiceImpl) StudentDashboardService(username string, requestDat
 	return bean.DashboardJSON{MonthlyAttendance: monthlyAttendance[:], Hour: int(duration.Hours()), Minute: int(duration.Minutes()) % 60, Second: int(duration.Seconds()) % 60}
 }
 
-func (impl *HomeServiceImpl) PrincipalDashboardService(data bean.GetHomeJSON) (map[string]int, bean.ErrorJSON) {
+func (impl *HomeServiceImpl) PrincipalDashboard(data bean.GetHomeJSON) (map[string]int, bean.ErrorJSON) {
 
 	startDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 0, 0, 0)
 	endDate, _ := util.FormateDateTime(data.Year, time.Month(data.Month), data.Date, 23, 59, 59)

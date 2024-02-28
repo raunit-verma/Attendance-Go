@@ -17,32 +17,15 @@ type ClassAttendanceHandler interface {
 
 type ClassAttendanceImpl struct {
 	classAttendance services.ClassAttendanceService
-	auth            auth.AuthToken
+	authService     auth.AuthService
 }
 
-func NewClassAttendanceImpl(classAttendance services.ClassAttendanceService, auth auth.AuthToken) *ClassAttendanceImpl {
-	return &ClassAttendanceImpl{classAttendance: classAttendance, auth: auth}
-}
-
-func ValidateClassRequestData(data bean.GetClassAttendanceJSON) (bool, string) {
-	if data.Class <= 0 || data.Class > 12 {
-		zap.L().Info("Requested class is not valid")
-		return true, "Class is not valid. "
-	} else if data.Month <= 0 || data.Month > 12 {
-		zap.L().Info("Requested month is not valid")
-		return true, "Month is not valid. "
-	} else if data.Year <= 2020 || data.Year >= 2100 {
-		zap.L().Info("Request year is not valid")
-		return true, "Year is not valid. "
-	} else if data.Day <= 0 || data.Day > 31 {
-		zap.L().Info("Requested day is not valid")
-		return true, "Day is not valid. "
-	}
-	return false, ""
+func NewClassAttendanceImpl(classAttendance services.ClassAttendanceService, auth auth.AuthService) *ClassAttendanceImpl {
+	return &ClassAttendanceImpl{classAttendance: classAttendance, authService: auth}
 }
 
 func (impl *ClassAttendanceImpl) GetClassAttendance(w http.ResponseWriter, r *http.Request) {
-	status, username, _ := impl.auth.VerifyToken(r)
+	status, username, _ := impl.authService.VerifyToken(r)
 	if status != http.StatusAccepted {
 		zap.L().Error("User not verified", zap.String("Code", "1"))
 		w.WriteHeader(status)
@@ -70,7 +53,8 @@ func (impl *ClassAttendanceImpl) GetClassAttendance(w http.ResponseWriter, r *ht
 	w.WriteHeader(status)
 	if status == http.StatusAccepted {
 		json.NewEncoder(w).Encode(allStudentList)
-	} else {
-		json.NewEncoder(w).Encode(errorJSON)
+		return
 	}
+	json.NewEncoder(w).Encode(errorJSON)
+
 }

@@ -6,15 +6,14 @@ import (
 	"time"
 
 	"github.com/go-pg/pg"
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
 type Repository interface {
-	GetUser(username string) *User
+	GetUser(username string) (*User, error)
 	AddNewUser(user *User) error
 	GetCurrentStatus(username string, startDate string, endDate string) (bool, []Attendance)
-	AddNewPunchIn(username string, currentTime time.Time) error
+	AddNewPunchIn(attendance Attendance) error
 	AddNewPunchOut(username string, attendance Attendance, currentTime time.Time) error
 	GetTeacherAttendance(username string, startDate string, endDate string) []Attendance
 	GetClassAttendance(class int, startDate string, endDate string) []bean.StudentAttendanceJSON
@@ -30,16 +29,16 @@ func NewRepositoryImpl(db *pg.DB) *RepositoryImpl {
 	return &RepositoryImpl{db: db}
 }
 
-func (impl *RepositoryImpl) GetUser(username string) *User {
+func (impl *RepositoryImpl) GetUser(username string) (*User, error) {
 	user := &User{}
 
 	err := impl.db.Model(user).Where("username=?", username).Select()
 
 	if err != nil {
 		zap.L().Info("No record found in DB", zap.String("username", username))
-		return nil
+		return nil, err
 	}
-	return user
+	return user, err
 }
 
 func (impl *RepositoryImpl) AddNewUser(user *User) error {
@@ -72,16 +71,11 @@ func (impl *RepositoryImpl) GetCurrentStatus(username string, startDate string, 
 	return true, attendances
 }
 
-func (impl *RepositoryImpl) AddNewPunchIn(username string, currentTime time.Time) error {
+func (impl *RepositoryImpl) AddNewPunchIn(attendance Attendance) error {
 
-	attendance := Attendance{
-		AttendanceID: uuid.New().String(),
-		PunchInDate:  currentTime,
-		Username:     username,
-	}
 	_, err := impl.db.Model(&attendance).Insert()
 	if err != nil {
-		zap.L().Error("Cannot add new punch in of user "+username, zap.Error(err))
+		zap.L().Error("Cannot add new punch in of user "+attendance.Username, zap.Error(err))
 		return err
 	}
 	return nil
